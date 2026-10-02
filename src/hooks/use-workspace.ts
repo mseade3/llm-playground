@@ -1,0 +1,113 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { WorkspaceState } from "@/lib/types";
+
+async function fetchState(): Promise<WorkspaceState> {
+  const res = await fetch("/api/state", { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to load workspace");
+  return res.json();
+}
+
+export function useWorkspace() {
+  const [state, setState] = useState<WorkspaceState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const mounted = useRef(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      const next = await fetchState();
+      if (mounted.current) {
+        setState(next);
+        setError(null);
+      }
+    } catch (e) {
+      if (mounted.current) {
+        setError(e instanceof Error ? e.message : "Could not load workspace");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    mounted.current = true;
+    void refresh();
+    const id = window.setInterval(() => {
+      void refresh();
+    }, 900);
+    return () => {
+      mounted.current = false;
+      window.clearInterval(id);
+    };
+  }, [refresh]);
+
+  const sendMessage = useCallback(async (message: string) => {
+    setSending(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      if (!res.ok) throw new Error("Failed to send message");
+      const next = (await res.json()) as WorkspaceState;
+      setState(next);
+    } finally {
+      setSending(false);
+    }
+  }, []);
+
+  const resolveApproval = useCallback(
+    async (approvalId: string, decision: "approved" | "rejected") => {
+      const res = await fetch("/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approvalId, decision }),
+      });
+      if (!res.ok) throw new Error("Failed to resolve approval");
+      setState(await res.json());
+    },
+    [],
+  );
+
+  const setComputerMode = useCallback(async (mode: "agent" | "user") => {
+    const res = await fetch("/api/computer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode }),
+    });
+    if (!res.ok) throw new Error("Failed to change computer mode");
+    setState(await res.json());
+  }, []);
+
+  const addMemory = useCallback(
+    async (kind: "preference" | "decision" | "project" | "fact", text: string) => {
+      const res = await fetch("/api/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, text }),
+      });
+      if (!res.ok) throw new Error("Failed to save memory");
+      setState(await res.json());
+    },
+    [],
+  );
+
+  const reset = useCallback(async () => {
+    const res = await fetch("/api/state", { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to reset");
+    setState(await res.json());
+  }, []);
+
+  return {
+    state,
+    error,
+    sending,
+    refresh,
+    sendMessage,
+    resolveApproval,
+    setComputerMode,
+    addMemory,
+    reset,
+  };
+}
