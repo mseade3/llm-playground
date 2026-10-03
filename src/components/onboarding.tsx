@@ -44,7 +44,7 @@ export function Onboarding({
       <div className="pointer-events-none absolute -right-16 bottom-28 h-48 w-48 animate-[dot-bob_7s_ease-in-out_infinite_reverse] rounded-full bg-amber-400/10 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-lg text-center">
-        <div className="mx-auto mb-4 grid h-8 w-8 grid-cols-3 gap-0.5 p-1">
+        <div className="mx-auto mb-3 grid h-7 w-7 grid-cols-3 gap-0.5 p-1">
           {Array.from({ length: 9 }).map((_, i) => (
             <span
               key={i}
@@ -58,21 +58,21 @@ export function Onboarding({
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-teal-300/70">
           OpenDots · Miles Seade
         </p>
-        <h1 className="font-heading mt-3 text-5xl tracking-tight text-zinc-50 md:text-6xl">
+        <h1 className="font-heading mt-2 text-4xl tracking-tight text-zinc-50 md:text-5xl">
           Summer 2027 workspace
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-zinc-400 md:text-base">
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
           Specialist Dots for internship prep — deepen{" "}
           <span className="text-teal-200/90">AADE</span>, research target roles,
           and ship application copy with review-before-save.
         </p>
 
-        <div className="mx-auto mt-8 flex justify-center">
+        <div className="mx-auto mt-5 flex justify-center">
           <DotAvatar tone={tone} status="thinking" size="xl" />
         </div>
 
         <form
-          className="mx-auto mt-8 max-w-sm space-y-5 text-left"
+          className="mx-auto mt-6 max-w-sm space-y-4 text-left"
           onSubmit={(e) => {
             e.preventDefault();
             setBusy(true);
