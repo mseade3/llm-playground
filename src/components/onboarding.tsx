@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DotAvatar } from "@/components/dot-avatar";
+import { RiverBackground } from "@/components/river-background";
 import type { AvatarTone } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -38,32 +39,29 @@ export function Onboarding({
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,120,110,0.26)_0%,_transparent_52%),radial-gradient(ellipse_at_bottom_left,_rgba(180,140,40,0.12)_0%,_transparent_42%),radial-gradient(ellipse_at_bottom_right,_rgba(30,40,38,0.9)_0%,_transparent_45%),linear-gradient(180deg,_#0b100f_0%,_#121816_100%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(120,200,180,0.12)_0.7px,transparent_0.7px)] [background-size:20px_20px]" />
-      <div className="pointer-events-none absolute -left-20 top-24 h-56 w-56 animate-[dot-bob_6s_ease-in-out_infinite] rounded-full bg-teal-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 bottom-28 h-48 w-48 animate-[dot-bob_7s_ease-in-out_infinite_reverse] rounded-full bg-amber-400/10 blur-3xl" />
+      <RiverBackground />
 
       <div className="relative z-10 w-full max-w-lg text-center">
-        <div className="mx-auto mb-3 grid h-7 w-7 grid-cols-3 gap-0.5 p-1">
+        <div className="mx-auto mb-4 grid h-7 w-7 grid-cols-3 gap-0.5 p-1">
           {Array.from({ length: 9 }).map((_, i) => (
             <span
               key={i}
               className={cn(
                 "rounded-[1px]",
-                i === 4 ? "bg-teal-400" : "bg-zinc-500",
+                i === 4 ? "bg-white" : "bg-neutral-600",
               )}
             />
           ))}
         </div>
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-teal-300/70">
+        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-neutral-500">
           OpenDots · Miles Seade
         </p>
-        <h1 className="font-heading mt-2 text-4xl tracking-tight text-zinc-50 md:text-5xl">
+        <h1 className="font-heading mt-3 text-[2.5rem] leading-[1.1] text-white md:text-5xl">
           Summer 2027 workspace
         </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
+        <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-neutral-400">
           Specialist Dots for internship prep — deepen{" "}
-          <span className="text-teal-200/90">AADE</span>, research target roles,
+          <span className="text-neutral-200">AADE</span>, research target roles,
           and ship application copy with review-before-save.
         </p>
 
@@ -88,19 +86,19 @@ export function Onboarding({
           }}
         >
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+            <label className="mb-1.5 block text-xs font-medium text-neutral-500">
               Your name
             </label>
             <Input
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
               maxLength={40}
-              className="h-11 rounded-xl border-zinc-700 bg-zinc-900/80 text-base text-zinc-100"
+              className="h-11 rounded-full border-neutral-800 bg-neutral-950/80 text-base text-neutral-100 placeholder:text-neutral-600"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+            <label className="mb-1.5 block text-xs font-medium text-neutral-500">
               Primary Dot (researcher)
             </label>
             <Input
@@ -108,15 +106,15 @@ export function Onboarding({
               onChange={(e) => setName(e.target.value)}
               maxLength={24}
               placeholder="Scout"
-              className="h-11 rounded-xl border-zinc-700 bg-zinc-900/80 text-base text-zinc-100"
+              className="h-11 rounded-full border-neutral-800 bg-neutral-950/80 text-base text-neutral-100 placeholder:text-neutral-600"
             />
-            <p className="mt-1.5 text-[11px] text-zinc-500">
+            <p className="mt-1.5 text-[11px] text-neutral-600">
               Quill (writer) and Relay (applications) join automatically.
             </p>
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-zinc-400">
+            <label className="mb-2 block text-xs font-medium text-neutral-500">
               Look
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -126,21 +124,21 @@ export function Onboarding({
                   type="button"
                   onClick={() => setTone(t.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border px-2 py-3 transition",
+                    "flex flex-col items-center gap-2 rounded-2xl border px-2 py-3 transition",
                     tone === t.id
-                      ? "border-teal-400/60 bg-zinc-900 shadow-sm"
-                      : "border-zinc-700/80 bg-zinc-900/40 hover:border-zinc-600",
+                      ? "border-neutral-500 bg-neutral-900"
+                      : "border-neutral-800 bg-black/40 hover:border-neutral-700",
                   )}
                 >
                   <DotAvatar tone={t.id} size="sm" />
-                  <span className="text-[11px] text-zinc-400">{t.label}</span>
+                  <span className="text-[11px] text-neutral-500">{t.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-medium text-zinc-400">
+            <label className="mb-2 block text-xs font-medium text-neutral-500">
               Start with these plugins
             </label>
             <div className="space-y-2">
@@ -154,17 +152,17 @@ export function Onboarding({
               ).map(([label, checked, setChecked, hint]) => (
                 <label
                   key={label}
-                  className="flex cursor-pointer items-center justify-between rounded-xl border border-zinc-700/80 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200"
+                  className="flex cursor-pointer items-center justify-between rounded-2xl border border-neutral-800 bg-black/50 px-3 py-2.5 text-sm text-neutral-200"
                 >
                   <span>
                     {label}{" "}
-                    <span className="text-zinc-500">· {hint}</span>
+                    <span className="text-neutral-600">· {hint}</span>
                   </span>
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={(e) => setChecked(e.target.checked)}
-                    className="h-4 w-4 accent-teal-500"
+                    className="h-4 w-4 accent-white"
                   />
                 </label>
               ))}
@@ -174,7 +172,7 @@ export function Onboarding({
           <Button
             type="submit"
             disabled={busy}
-            className="h-11 w-full rounded-xl bg-teal-500 text-sm font-medium text-zinc-950 hover:bg-teal-400"
+            className="h-11 w-full rounded-full bg-white text-sm font-medium text-black hover:bg-neutral-200"
           >
             {busy
               ? "Waking…"

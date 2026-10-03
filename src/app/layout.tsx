@@ -1,17 +1,38 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Outfit } from "next/font/google";
+import localFont from "next/font/local";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const outfit = Outfit({
+/**
+ * Switzer (Fontshare / Indian Type Foundry) — free neo-grotesque closest to
+ * OpenAI docs’ Söhne / OpenAI Sans look. Self-hosted; Söhne & OpenAI Sans are not freely redistributable.
+ */
+const switzer = localFont({
+  src: [
+    {
+      path: "../fonts/switzer-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/switzer-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../fonts/switzer-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../fonts/switzer-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const instrument = Instrument_Serif({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: "400",
+  display: "swap",
+  fallback: ["ui-sans-serif", "system-ui", "Helvetica Neue", "Arial", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`dark ${outfit.variable} ${instrument.variable} h-full antialiased`}
+      className={`dark ${switzer.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">
         <TooltipProvider>{children}</TooltipProvider>

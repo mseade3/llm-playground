@@ -35,8 +35,8 @@ export function ComputerPanel({
   const view = state.computer.activeView;
 
   return (
-    <aside className="flex h-full min-h-0 flex-col border-l border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md">
-      <header className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-3">
+    <aside className="flex h-full min-h-0 flex-col border-l border-neutral-800/60 bg-black/45 backdrop-blur-md">
+      <header className="flex items-center justify-between border-b border-neutral-800/60 px-4 py-3">
         <div>
           <p className="text-sm font-medium text-zinc-100">Computer</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-zinc-500">

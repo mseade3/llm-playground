@@ -26,6 +26,11 @@ Based on patterns in [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDot
 - **Review cards** — Approve & save / Decline before writing to a Space
 - **Plugin registry** — Canvas, GitHub, Gmail, and more (mock or live tokens)
 
+## Design notes
+
+- **Typography:** Self-hosted **Switzer** (Fontshare / Indian Type Foundry) — a free neo-grotesque that reads close to OpenAI docs’ Söhne / OpenAI Sans. Proprietary OpenAI Sans and Klim Söhne are not freely redistributable, so Switzer is the legal webfont stand-in applied across body, headings, and nav.
+- **Atmosphere:** A GPU-friendly CSS “river” light field (transform/opacity bands + soft caustics) behind onboarding and the workspace shell. Honors `prefers-reduced-motion: reduce`.
+
 ## Run locally
 
 ```bash

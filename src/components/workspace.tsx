@@ -8,6 +8,7 @@ import { Onboarding } from "@/components/onboarding";
 import { OpenDotsChat } from "@/components/opendots-chat";
 import { OpenDotsNav } from "@/components/opendots-nav";
 import { PluginsPanel } from "@/components/plugins-panel";
+import { RiverBackground } from "@/components/river-background";
 import { SpaceWorkspace } from "@/components/space-workspace";
 import { useWorkspace } from "@/hooks/use-workspace";
 import type { Proactivity } from "@/lib/types";
@@ -47,12 +48,13 @@ export function Workspace() {
 
   if (error && !state) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6">
-        <div className="max-w-md text-center">
-          <h1 className="font-heading text-3xl text-zinc-50">OpenDots</h1>
-          <p className="mt-3 text-sm text-zinc-400">{error}</p>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+        <RiverBackground />
+        <div className="relative z-10 max-w-md text-center">
+          <h1 className="font-heading text-3xl text-white">OpenDots</h1>
+          <p className="mt-3 text-sm text-neutral-400">{error}</p>
           <Button
-            className="mt-4 bg-teal-500 text-zinc-950 hover:bg-teal-400"
+            className="mt-4 rounded-full bg-white text-black hover:bg-neutral-200"
             onClick={() => window.location.reload()}
           >
             Retry
@@ -64,11 +66,12 @@ export function Workspace() {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="flex items-center gap-3 text-sm text-zinc-400">
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+        <RiverBackground />
+        <div className="relative z-10 flex items-center gap-3 text-sm text-neutral-400">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal-400" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/50 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
           </span>
           Waking OpenDots…
         </div>
@@ -84,8 +87,8 @@ export function Workspace() {
     state.dots.find((d) => d.id === state.selectedDotId) ?? state.dots[0];
 
   return (
-    <div className="relative flex h-dvh overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_rgba(45,140,120,0.12)_0%,_transparent_40%),linear-gradient(180deg,_#0a0e0d_0%,_#101614_100%)]">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.2] [background-image:radial-gradient(rgba(120,200,180,0.12)_0.55px,transparent_0.55px)] [background-size:16px_16px]" />
+    <div className="relative flex h-dvh overflow-hidden bg-black">
+      <RiverBackground />
 
       <div className="relative z-10 hidden w-[240px] shrink-0 lg:block">
         <OpenDotsNav
@@ -125,8 +128,8 @@ export function Workspace() {
 
           {state.view === "plugins" && (
             <div className="h-full overflow-y-auto p-4 md:p-6">
-              <h2 className="font-heading text-2xl text-zinc-50">Plugins</h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h2 className="font-heading text-2xl text-white">Plugins</h2>
+              <p className="mt-1 text-sm text-neutral-500">
                 Life surfaces your Dots can sync — Canvas, GitHub, and more.
               </p>
               <div className="mt-4">
@@ -142,8 +145,8 @@ export function Workspace() {
 
           {state.view === "memory" && (
             <div className="h-full overflow-y-auto p-4 md:p-6">
-              <h2 className="font-heading text-2xl text-zinc-50">Memory</h2>
-              <p className="mt-1 text-sm text-zinc-500">
+              <h2 className="font-heading text-2xl text-white">Memory</h2>
+              <p className="mt-1 text-sm text-neutral-500">
                 Shared notes across Scout, Quill, and Relay — AADE, roles, and apps.
               </p>
               <form
@@ -160,12 +163,12 @@ export function Workspace() {
                   value={memoryText}
                   onChange={(e) => setMemoryText(e.target.value)}
                   placeholder="Add a memory…"
-                  className="h-10 flex-1 rounded-xl border border-zinc-800 bg-zinc-900/70 px-3 text-sm text-zinc-100 outline-none focus:border-teal-500/40"
+                  className="h-10 flex-1 rounded-full border border-neutral-800 bg-black/60 px-4 text-sm text-neutral-100 outline-none focus:border-neutral-600"
                 />
                 <Button
                   type="submit"
                   size="sm"
-                  className="bg-teal-500 text-zinc-950 hover:bg-teal-400"
+                  className="rounded-full bg-white text-black hover:bg-neutral-200"
                 >
                   Save
                 </Button>
@@ -174,9 +177,9 @@ export function Workspace() {
                 {state.memory.map((m) => (
                   <li
                     key={m.id}
-                    className="rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-300"
+                    className="rounded-2xl border border-neutral-800 bg-black/40 px-3 py-2.5 text-sm text-neutral-300"
                   >
-                    <span className="mr-2 text-[10px] uppercase tracking-wider text-zinc-500">
+                    <span className="mr-2 text-[10px] uppercase tracking-wider text-neutral-600">
                       {m.kind}
                     </span>
                     {m.text}
@@ -190,17 +193,17 @@ export function Workspace() {
             <div className="h-full overflow-y-auto p-4 md:p-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-heading text-2xl text-zinc-50">
+                  <h2 className="font-heading text-2xl text-white">
                     Settings
                   </h2>
-                  <p className="mt-1 text-sm text-zinc-500">
+                  <p className="mt-1 text-sm text-neutral-500">
                     Proactivity, rules, and workspace reset.
                   </p>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-zinc-400"
+                  className="text-neutral-400"
                   onClick={() => void reset()}
                 >
                   <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
@@ -209,7 +212,7 @@ export function Workspace() {
               </div>
 
               <div className="mt-6">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-500">
                   Proactivity
                 </p>
                 <div className="grid gap-2 sm:grid-cols-3">
@@ -219,34 +222,34 @@ export function Workspace() {
                       type="button"
                       onClick={() => void setProactivity(level.id)}
                       className={cn(
-                        "rounded-xl border px-3 py-2.5 text-left transition",
+                        "rounded-2xl border px-3 py-2.5 text-left transition",
                         state.proactivity === level.id
-                          ? "border-teal-500/50 bg-teal-500/10"
-                          : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700",
+                          ? "border-neutral-500 bg-neutral-900"
+                          : "border-neutral-800 bg-black/40 hover:border-neutral-700",
                       )}
                     >
-                      <p className="text-sm font-medium text-zinc-100">
+                      <p className="text-sm font-medium text-neutral-100">
                         {level.label}
                       </p>
-                      <p className="text-xs text-zinc-500">{level.hint}</p>
+                      <p className="text-xs text-neutral-500">{level.hint}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="mt-8">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-neutral-500">
                   Custom rules
                 </p>
                 <div className="space-y-2">
                   {state.rules.map((rule) => (
                     <div
                       key={rule.id}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2.5"
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-neutral-800 bg-black/40 px-3 py-2.5"
                     >
                       <div>
-                        <p className="text-sm text-zinc-100">{rule.label}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-sm text-neutral-100">{rule.label}</p>
+                        <p className="text-xs text-neutral-500">
                           {rule.description}
                         </p>
                       </div>
@@ -257,10 +260,10 @@ export function Workspace() {
                             type="button"
                             onClick={() => void updateRule(rule.id, mode)}
                             className={cn(
-                              "rounded-md px-2 py-1 text-[11px] capitalize",
+                              "rounded-full px-2.5 py-1 text-[11px] capitalize",
                               rule.mode === mode
-                                ? "bg-teal-500/20 text-teal-200"
-                                : "bg-zinc-800 text-zinc-500",
+                                ? "bg-white text-black"
+                                : "bg-neutral-900 text-neutral-500",
                             )}
                           >
                             {mode}
@@ -291,15 +294,15 @@ export function Workspace() {
         </div>
       </main>
 
-      <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full border border-zinc-800 bg-zinc-950/90 p-1 lg:hidden">
+      <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full border border-neutral-800 bg-black/90 p-1 lg:hidden">
         <button
           type="button"
           onClick={() => setMobilePane("chat")}
           className={cn(
             "rounded-full px-3 py-1.5 text-xs",
             mobilePane === "chat"
-              ? "bg-zinc-800 text-zinc-50"
-              : "text-zinc-500",
+              ? "bg-neutral-800 text-white"
+              : "text-neutral-500",
           )}
         >
           Chat
@@ -310,8 +313,8 @@ export function Workspace() {
           className={cn(
             "rounded-full px-3 py-1.5 text-xs",
             mobilePane === "computer"
-              ? "bg-zinc-800 text-zinc-50"
-              : "text-zinc-500",
+              ? "bg-neutral-800 text-white"
+              : "text-neutral-500",
           )}
         >
           Computer

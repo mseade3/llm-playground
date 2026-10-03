@@ -151,7 +151,7 @@ function ReviewCardView({
           </Button>
           <Button
             size="sm"
-            className="ml-auto bg-teal-500 text-zinc-950 hover:bg-teal-400"
+            className="ml-auto rounded-full bg-white text-black hover:bg-neutral-200"
             onClick={onApprove}
           >
             <Check className="mr-1 h-3.5 w-3.5" />
@@ -206,7 +206,7 @@ export function OpenDotsChat({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-zinc-950/30">
+    <section className="flex h-full min-h-0 flex-col bg-black/25">
       <header className="flex items-center justify-between gap-3 border-b border-zinc-800/80 px-4 py-3 md:px-5">
         <div className="flex min-w-0 items-center gap-3">
           {dot && (
@@ -344,7 +344,7 @@ export function OpenDotsChat({
             type="submit"
             size="sm"
             disabled={!draft.trim() || sending}
-            className="h-9 w-9 shrink-0 rounded-xl bg-teal-500 p-0 text-zinc-950 hover:bg-teal-400"
+            className="h-9 w-9 shrink-0 rounded-full bg-white p-0 text-black hover:bg-neutral-200"
           >
             <ArrowUp className="h-4 w-4" />
           </Button>
