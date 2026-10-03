@@ -1,23 +1,16 @@
-# Dot — always-on agent workspace
+# OpenDots workspace
 
-Dark-themed Dots-inspired agent with a **plugin registry** for life surfaces (Canvas, GitHub, Gmail, money stubs, and more). Connect plugins, enable standing goals, sync mock or live APIs, and let Dot work behind the scenes.
+An [OpenDots](https://www.copilotkit.ai/opendots)-inspired always-on agent workspace built with Next.js. Specialist Dots (Scout, Quill, Relay) share **Spaces**, work on a persistent **Computer** (browser / files / terminal), and pause for **review-before-save**.
 
-## Plugin registry
+Based on the patterns in [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDots) — Spaces, multi-Dot specialists, computer tools, and human-in-the-loop cards — running as a local mock agent (no Node 24 / OpenBot requirement).
 
-| Plugin | Category | Status | Live env |
-| --- | --- | --- | --- |
-| Canvas | School | Implemented (mock/live) | `CANVAS_BASE_URL`, `CANVAS_API_TOKEN` |
-| GitHub | Build | Implemented (mock/live) | `GITHUB_TOKEN` (+ optional `GITHUB_OWNER`, `GITHUB_REPO`) |
-| Gmail / Slack / YouTube / Notion | Comms/Content/Ops | Implemented (mock) | — |
-| Stripe / Upwork / Calendar | Money/Ops | Catalog stubs | see `.env.example` |
+## Features
 
-**How to add another life surface**
-1. Add a row to `src/lib/plugins/registry.ts`
-2. Add a handler in `src/lib/plugins/handlers/`
-3. Register it in `handlers/index.ts`
-4. (Optional) add an agent plan in `src/lib/agent.ts`
-
-Standing goals ship with each plugin and toggle on connect.
+- **Spaces** — Launch & Research document homes; approved drafts become pages
+- **Dots** — Scout (research), Quill (writer), Relay (comms) with per-Dot permissions
+- **Computer** — Browser, Files, Terminal tabs + Take over
+- **Review cards** — Approve & save / Decline before writing to a Space
+- **Plugin registry** — Canvas, GitHub, Gmail, and more (mock or live tokens)
 
 ## Run locally
 
@@ -29,14 +22,20 @@ npm run dev
 
 Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
-## Try
+## Try the OpenDots flow
 
-1. Create Winston with Canvas + GitHub checked
-2. Open the **Plug** tab → Sync Canvas / GitHub
-3. Chat: **Check Canvas for what's due** or **Triage my GitHub issues**
-4. Enable standing goals per plugin for behind-the-scenes watching
+1. Create Scout (Quill + Relay join automatically)
+2. Ask: *Open Acme's Agents SDK announcement, summarize what they shipped, and save notes I can use in the launch brief.*
+3. Watch browser → file → terminal actions inline
+4. **Approve & save** the review card into Launch
+5. Open the **Launch** Space to read the saved page
 
-## Notes
+## Plugins
 
-- Without tokens, plugins run in **mock** mode so the demo always works.
-- State: `.data/workspace.json` (gitignored). **Reset** clears to Create your Dot.
+| Plugin | Status | Live env |
+| --- | --- | --- |
+| Canvas | mock/live | `CANVAS_BASE_URL`, `CANVAS_API_TOKEN` |
+| GitHub | mock/live | `GITHUB_TOKEN` |
+| Gmail / Slack / YouTube | mock | — |
+
+State lives in `.data/workspace.json` (gitignored). Use **Settings → Reset** to start over.

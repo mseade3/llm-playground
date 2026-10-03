@@ -12,6 +12,13 @@ import type {
   WorkspaceState,
 } from "./types";
 import {
+  defaultComputerFiles,
+  defaultDots,
+  defaultPages,
+  DEFAULT_SPACES,
+  defaultTerminal,
+} from "./opendots/defaults";
+import {
   defaultPluginConnections,
   defaultPluginStandingGoals,
   mergePluginConnections,
@@ -27,16 +34,19 @@ function defaultComputer(name: string): ComputerState {
     status: "idle",
     currentAction: undefined,
     authChallenge: null,
+    activeView: "browser",
+    files: defaultComputerFiles(),
+    terminal: defaultTerminal(),
     tabs: [
       {
         id: "home",
         title: `${name}'s Computer`,
         url: "about:blank",
-        content: `${name}'s cloud computer is ready — browser, shell, and repo access. Hand over a goal and watch the work land here.`,
+        content: `${name}'s computer is ready — browser, files, and shell persist across stop and start.`,
         active: true,
       },
     ],
-    logs: ["Cloud computer booted.", "Browser ready.", "Waiting for a goal."],
+    logs: ["Computer booted.", "Browser ready.", "Waiting for a goal."],
   };
 }
 
@@ -51,7 +61,7 @@ function defaultRules() {
     {
       id: "rule-tests",
       label: "Run tests",
-      description: "Execute test suites on the cloud computer.",
+      description: "Execute test suites on the computer.",
       mode: "allow" as const,
     },
     {
@@ -78,37 +88,47 @@ function defaultRules() {
 export function defaultState(): WorkspaceState {
   const now = new Date().toISOString();
   const plugins = defaultPluginConnections();
+  const dots = defaultDots();
   return {
     onboarded: false,
-    agentName: "Winston",
-    avatarTone: "teal",
+    agentName: "Scout",
+    avatarTone: "coral",
     proactivity: "balanced",
     localComputerConnected: true,
     selectedTaskId: null,
+    selectedDotId: dots[0]?.id ?? null,
+    selectedSpaceId: null,
+    selectedPageId: null,
+    view: "chat",
+    ownerName: "David McKay",
     lastProactiveAt: null,
     agentStatus: "idle",
     messages: [],
     tasks: [],
     approvals: [],
+    reviews: [],
+    dots,
+    spaces: DEFAULT_SPACES,
+    pages: defaultPages(),
     memory: [
       {
         id: randomUUID(),
         kind: "preference",
-        text: "Prefer small PRs with clear summaries over giant diffs.",
+        text: "Prefer review-before-save for anything lasting in Spaces.",
         createdAt: now,
         updatedAt: now,
       },
       {
         id: randomUUID(),
         kind: "preference",
-        text: "Ask before opening pull requests or sending external messages.",
+        text: "Scout researches; Quill writes; Relay handles #launch.",
         createdAt: now,
         updatedAt: now,
       },
       {
         id: randomUUID(),
-        kind: "preference",
-        text: "When remote, orchestrate Codex-style threads instead of making me hop between projects.",
+        kind: "fact",
+        text: "OpenDots-style workspace: Spaces for pages, Dots for specialists, Computer for tools.",
         createdAt: now,
         updatedAt: now,
       },
@@ -116,12 +136,12 @@ export function defaultState(): WorkspaceState {
     rules: defaultRules(),
     plugins,
     standingGoals: defaultPluginStandingGoals(plugins),
-    computer: defaultComputer("Winston"),
+    computer: defaultComputer("Scout"),
     activity: [
       {
         id: randomUUID(),
         type: "info",
-        text: "Create your Dot to get started.",
+        text: "OpenDots workspace ready — create your profile to meet your Dots.",
         createdAt: now,
       },
     ],
@@ -135,6 +155,9 @@ function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): Workspa
   const standingGoals = raw.standingGoals?.length
     ? mergeStandingGoals(raw.standingGoals, plugins)
     : defaultPluginStandingGoals(plugins);
+  const dots = raw.dots?.length ? raw.dots : base.dots;
+  const spaces = raw.spaces?.length ? raw.spaces : base.spaces;
+  const pages = raw.pages?.length ? raw.pages : base.pages;
   return {
     ...base,
     ...raw,
@@ -144,14 +167,30 @@ function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): Workspa
     proactivity: raw.proactivity ?? base.proactivity,
     localComputerConnected: raw.localComputerConnected ?? true,
     selectedTaskId: raw.selectedTaskId ?? null,
+    selectedDotId: raw.selectedDotId ?? dots[0]?.id ?? null,
+    selectedSpaceId: raw.selectedSpaceId ?? null,
+    selectedPageId: raw.selectedPageId ?? null,
+    view: raw.view ?? "chat",
+    ownerName: raw.ownerName ?? base.ownerName,
     lastProactiveAt: raw.lastProactiveAt ?? null,
     rules: raw.rules?.length ? raw.rules : base.rules,
     plugins,
     standingGoals,
+    dots,
+    spaces,
+    pages,
+    reviews: raw.reviews ?? [],
     computer: {
       ...defaultComputer(name),
       ...(raw.computer ?? {}),
       authChallenge: raw.computer?.authChallenge ?? null,
+      files: raw.computer?.files?.length
+        ? raw.computer.files
+        : defaultComputerFiles(),
+      terminal: raw.computer?.terminal?.length
+        ? raw.computer.terminal
+        : defaultTerminal(),
+      activeView: raw.computer?.activeView ?? "browser",
     },
     messages: raw.messages ?? [],
     tasks: raw.tasks ?? [],
@@ -221,14 +260,28 @@ export async function updateState(
 export async function addMessage(
   role: Message["role"],
   content: string,
-  taskId?: string,
+  taskIdOrExtras?:
+    | string
+    | {
+        taskId?: string;
+        dotId?: string;
+        actions?: Message["actions"];
+        reviewId?: string;
+      },
 ): Promise<Message> {
+  const extras =
+    typeof taskIdOrExtras === "string"
+      ? { taskId: taskIdOrExtras }
+      : taskIdOrExtras;
   const message: Message = {
     id: randomUUID(),
     role,
     content,
     createdAt: new Date().toISOString(),
-    taskId,
+    taskId: extras?.taskId,
+    dotId: extras?.dotId,
+    actions: extras?.actions,
+    reviewId: extras?.reviewId,
   };
   await updateState((state) => {
     state.messages.push(message);
@@ -310,15 +363,37 @@ export async function createDot(
     connectYoutube?: boolean;
     connectCanvas?: boolean;
     connectGithub?: boolean;
+    ownerName?: string;
   },
 ): Promise<WorkspaceState> {
-  const trimmed = name.trim().slice(0, 24) || "Winston";
+  const trimmed = name.trim().slice(0, 24) || "Scout";
   const now = new Date().toISOString();
   const state = defaultState();
   state.onboarded = true;
   state.agentName = trimmed;
   state.avatarTone = avatarTone;
+  state.ownerName = options?.ownerName?.trim() || "David McKay";
   state.computer = defaultComputer(trimmed);
+
+  // Rename primary researcher to the chosen name while keeping Quill/Relay
+  const scout = state.dots.find((d) => d.id === "dot-scout");
+  if (scout) {
+    scout.name = trimmed;
+    scout.tone =
+      avatarTone === "indigo"
+        ? "violet"
+        : avatarTone === "sky"
+          ? "sky"
+          : avatarTone === "amber"
+            ? "amber"
+            : avatarTone === "teal"
+              ? "teal"
+              : "coral";
+    scout.lastActivity = "Online";
+    scout.lastActivityAt = now;
+  }
+  state.selectedDotId = "dot-scout";
+  state.view = "chat";
 
   const wanted: Record<string, boolean> = {
     gmail: options?.connectGmail ?? true,
@@ -343,15 +418,16 @@ export async function createDot(
     {
       id: randomUUID(),
       role: "assistant",
-      content: `I'm ${trimmed} — your always-on Dot. Connect life surfaces in **Plugins**, keep standing goals watching in the background, and I'll orchestrate the work.\n\nTry: “Check Canvas for what's due” or “Triage my GitHub issues.”`,
+      content: `I'm ${trimmed} — your research Dot. I work on a persistent computer with browser, files, and shell.\n\nTry the OpenDots flow: *Open Acme's Agents SDK announcement, summarize what they shipped, and save notes I can use in the launch brief.*`,
       createdAt: now,
+      dotId: "dot-scout",
     },
   ];
   state.activity = [
     {
       id: randomUUID(),
       type: "info",
-      text: `${trimmed} is online — plugin registry ready.`,
+      text: `${trimmed}, Quill, and Relay are online — Spaces ready.`,
       createdAt: now,
     },
   ];

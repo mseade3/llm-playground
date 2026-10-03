@@ -6,12 +6,23 @@ import type {
   Proactivity,
   RuleMode,
   WorkspaceState,
+  WorkspaceView,
 } from "@/lib/types";
 
 async function fetchState(): Promise<WorkspaceState> {
   const res = await fetch("/api/state", { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to load workspace");
   return res.json();
+}
+
+async function workspaceAction(body: Record<string, unknown>) {
+  const res = await fetch("/api/workspace", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error("Workspace action failed");
+  return res.json() as Promise<WorkspaceState>;
 }
 
 export function useWorkspace() {
@@ -54,6 +65,7 @@ export function useWorkspace() {
       connectYoutube: boolean;
       connectCanvas: boolean;
       connectGithub: boolean;
+      ownerName?: string;
     }) => {
       const res = await fetch("/api/onboard", {
         method: "POST",
@@ -65,6 +77,7 @@ export function useWorkspace() {
           connectYoutube: payload.connectYoutube,
           connectCanvas: payload.connectCanvas,
           connectGithub: payload.connectGithub,
+          ownerName: payload.ownerName,
         }),
       });
       if (!res.ok) throw new Error("Failed to create Dot");
@@ -195,6 +208,31 @@ export function useWorkspace() {
     setState(await res.json());
   }, []);
 
+  const selectDot = useCallback(async (dotId: string) => {
+    setState(await workspaceAction({ action: "selectDot", dotId }));
+  }, []);
+
+  const selectSpace = useCallback(async (spaceId: string) => {
+    setState(await workspaceAction({ action: "selectSpace", spaceId }));
+  }, []);
+
+  const selectPage = useCallback(async (spaceId: string, pageId: string) => {
+    setState(
+      await workspaceAction({ action: "selectPage", spaceId, pageId }),
+    );
+  }, []);
+
+  const setView = useCallback(async (view: WorkspaceView) => {
+    setState(await workspaceAction({ action: "setView", view }));
+  }, []);
+
+  const setComputerTab = useCallback(
+    async (tab: "browser" | "files" | "terminal") => {
+      setState(await workspaceAction({ action: "computerTab", tab }));
+    },
+    [],
+  );
+
   const reset = useCallback(async () => {
     const res = await fetch("/api/state", { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to reset");
@@ -218,6 +256,11 @@ export function useWorkspace() {
     toggleGoal,
     setProactivity,
     selectTask,
+    selectDot,
+    selectSpace,
+    selectPage,
+    setView,
+    setComputerTab,
     reset,
   };
 }

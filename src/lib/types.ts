@@ -1,7 +1,28 @@
 import type { PluginConnection as PluginConnectionModel } from "./plugins/types";
+import type {
+  ComputerFile,
+  InlineAction,
+  ReviewCard,
+  Space,
+  SpacePage,
+  SpecialistDot,
+  TerminalLine,
+  WorkspaceView,
+} from "./opendots/types";
 
 export type PluginConnection = PluginConnectionModel;
 export type { PluginMode } from "./plugins/types";
+export type {
+  ComputerFile,
+  DotPermission,
+  InlineAction,
+  ReviewCard,
+  Space,
+  SpacePage,
+  SpecialistDot,
+  TerminalLine,
+  WorkspaceView,
+} from "./opendots/types";
 
 export type MessageRole = "user" | "assistant" | "system";
 
@@ -11,6 +32,9 @@ export type Message = {
   content: string;
   createdAt: string;
   taskId?: string;
+  dotId?: string;
+  actions?: InlineAction[];
+  reviewId?: string;
 };
 
 export type TaskStatus =
@@ -31,7 +55,9 @@ export type StepKind =
   | "memory"
   | "code"
   | "test"
-  | "pr";
+  | "pr"
+  | "shell"
+  | "file";
 
 export type TaskStep = {
   id: string;
@@ -43,8 +69,18 @@ export type TaskStep = {
   result?: string;
   durationMs?: number;
   browse?: { title: string; url: string; content: string };
-  /** Pause for login / 2FA takeover on the cloud computer */
   needsAuth?: { site: string; message: string };
+  /** Inline chat action emitted when the step completes */
+  inlineAction?: InlineAction;
+  /** Review-before-save payload for write steps */
+  review?: {
+    title: string;
+    summary: string;
+    body: string;
+    targetSpaceId: string;
+  };
+  fileWrite?: { path: string; content: string; sizeLabel: string };
+  terminal?: { command: string; output: string };
 };
 
 export type PullRequest = {
@@ -72,10 +108,9 @@ export type Task = {
   artifact?: string;
   pullRequests?: PullRequest[];
   error?: string;
-  /** Orchestration thread label shown in the activity rail */
   threadLabel?: string;
-  /** Simulated sub-agent / worker model (e.g. Soul 6.1) */
   workerModel?: string;
+  dotId?: string;
 };
 
 export type Approval = {
@@ -87,6 +122,7 @@ export type Approval = {
   action: string;
   createdAt: string;
   status: "pending" | "approved" | "rejected";
+  reviewId?: string;
 };
 
 export type MemoryNote = {
@@ -143,11 +179,14 @@ export type AuthChallenge = {
 
 export type ComputerState = {
   mode: ComputerMode;
-  status: "idle" | "working" | "waiting" | "offline";
+  status: "idle" | "working" | "waiting" | "offline" | "running";
   currentAction?: string;
   tabs: BrowserTab[];
   logs: string[];
   authChallenge?: AuthChallenge | null;
+  files: ComputerFile[];
+  terminal: TerminalLine[];
+  activeView: "browser" | "files" | "terminal";
 };
 
 export type ActivityEvent = {
@@ -167,7 +206,7 @@ export type ActivityEvent = {
   taskId?: string;
 };
 
-export type AvatarTone = "teal" | "coral" | "indigo" | "amber";
+export type AvatarTone = "teal" | "coral" | "indigo" | "amber" | "violet" | "sky";
 
 export type Proactivity = "quiet" | "balanced" | "high";
 
@@ -178,9 +217,18 @@ export type WorkspaceState = {
   proactivity: Proactivity;
   localComputerConnected: boolean;
   selectedTaskId?: string | null;
+  selectedDotId: string | null;
+  selectedSpaceId: string | null;
+  selectedPageId: string | null;
+  view: WorkspaceView;
+  ownerName: string;
   messages: Message[];
   tasks: Task[];
   approvals: Approval[];
+  reviews: ReviewCard[];
+  dots: SpecialistDot[];
+  spaces: Space[];
+  pages: SpacePage[];
   memory: MemoryNote[];
   rules: CustomRule[];
   plugins: PluginConnection[];

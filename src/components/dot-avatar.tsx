@@ -27,6 +27,16 @@ const TONE_CLASSES: Record<
     glow: "bg-amber-400/40",
     eye: "bg-amber-50",
   },
+  violet: {
+    orb: "from-fuchsia-300 via-violet-500 to-violet-900",
+    glow: "bg-violet-400/40",
+    eye: "bg-violet-50",
+  },
+  sky: {
+    orb: "from-sky-200 via-sky-500 to-blue-800",
+    glow: "bg-sky-400/40",
+    eye: "bg-sky-50",
+  },
 };
 
 export function DotAvatar({

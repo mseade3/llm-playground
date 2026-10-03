@@ -8,10 +8,10 @@ import type { AvatarTone } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const TONES: { id: AvatarTone; label: string }[] = [
-  { id: "teal", label: "Teal" },
   { id: "coral", label: "Coral" },
-  { id: "indigo", label: "Indigo" },
-  { id: "amber", label: "Amber" },
+  { id: "teal", label: "Teal" },
+  { id: "violet", label: "Violet" },
+  { id: "sky", label: "Sky" },
 ];
 
 export function Onboarding({
@@ -24,10 +24,12 @@ export function Onboarding({
     connectYoutube: boolean;
     connectCanvas: boolean;
     connectGithub: boolean;
+    ownerName?: string;
   }) => Promise<void>;
 }) {
-  const [name, setName] = useState("Winston");
-  const [tone, setTone] = useState<AvatarTone>("teal");
+  const [name, setName] = useState("Scout");
+  const [ownerName, setOwnerName] = useState("David McKay");
+  const [tone, setTone] = useState<AvatarTone>("coral");
   const [connectGmail, setConnectGmail] = useState(true);
   const [connectYoutube, setConnectYoutube] = useState(false);
   const [connectCanvas, setConnectCanvas] = useState(true);
@@ -40,15 +42,35 @@ export function Onboarding({
       <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(120,200,180,0.12)_0.7px,transparent_0.7px)] [background-size:20px_20px]" />
 
       <div className="relative z-10 w-full max-w-lg text-center">
+        <div className="mx-auto mb-4 grid h-8 w-8 grid-cols-3 gap-0.5 p-1">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "rounded-[1px]",
+                i === 4 ? "bg-teal-400" : "bg-zinc-500",
+              )}
+            />
+          ))}
+        </div>
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-teal-300/70">
-          Create your Dot
+          OpenDots
         </p>
         <h1 className="font-heading mt-3 text-5xl tracking-tight text-zinc-50 md:text-6xl">
-          Plug in your life
+          Meet your Dots
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-zinc-400 md:text-base">
-          Connect school, code, and inbox surfaces now. Add money plugins later
-          from the registry — Dot keeps standing goals watching behind the scenes.
+          Specialist agents with Spaces, a persistent computer, and
+          review-before-save — inspired by{" "}
+          <a
+            href="https://www.copilotkit.ai/opendots"
+            className="text-teal-300 underline-offset-2 hover:underline"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CopilotKit OpenDots
+          </a>
+          .
         </p>
 
         <div className="mx-auto mt-8 flex justify-center">
@@ -61,26 +83,42 @@ export function Onboarding({
             e.preventDefault();
             setBusy(true);
             void onCreate({
-              name: name.trim() || "Winston",
+              name: name.trim() || "Scout",
               tone,
               connectGmail,
               connectYoutube,
               connectCanvas,
               connectGithub,
+              ownerName: ownerName.trim() || "David McKay",
             }).finally(() => setBusy(false));
           }}
         >
           <div>
             <label className="mb-1.5 block text-xs font-medium text-zinc-400">
-              Name
+              Your name
+            </label>
+            <Input
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              maxLength={40}
+              className="h-11 rounded-xl border-zinc-700 bg-zinc-900/80 text-base text-zinc-100"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+              Primary Dot (researcher)
             </label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={24}
-              placeholder="Winston"
+              placeholder="Scout"
               className="h-11 rounded-xl border-zinc-700 bg-zinc-900/80 text-base text-zinc-100"
             />
+            <p className="mt-1.5 text-[11px] text-zinc-500">
+              Quill (writer) and Relay (comms) join automatically.
+            </p>
           </div>
 
           <div>
@@ -144,7 +182,7 @@ export function Onboarding({
             disabled={busy}
             className="h-11 w-full rounded-xl bg-teal-500 text-sm font-medium text-zinc-950 hover:bg-teal-400"
           >
-            {busy ? "Waking…" : `Start with ${name.trim() || "Winston"}`}
+            {busy ? "Waking…" : `Enter OpenDots with ${name.trim() || "Scout"}`}
           </Button>
         </form>
       </div>

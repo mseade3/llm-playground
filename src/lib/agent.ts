@@ -7,6 +7,12 @@ import {
   updateState,
   upsertMemory,
 } from "./store";
+import {
+  applyStepSideEffects,
+  createReviewForStep,
+  saveReviewToSpace,
+  toneToAvatar,
+} from "./opendots/runtime";
 import type {
   Approval,
   BrowserTab,
@@ -23,6 +29,7 @@ type PlanSeed = {
   goalLabel: string;
   threadLabel?: string;
   workerModel?: string;
+  preferredDotId?: string;
   memory?: { kind: "project" | "preference" | "fact"; text: string };
   steps: Array<{
     title: string;
@@ -33,6 +40,9 @@ type PlanSeed = {
     needsAuth?: { site: string; message: string };
     result: string;
     durationMs: number;
+    fileWrite?: TaskStep["fileWrite"];
+    terminal?: TaskStep["terminal"];
+    review?: TaskStep["review"];
   }>;
   artifact: string;
   pullRequests?: Array<Omit<PullRequest, "id" | "taskId" | "createdAt">>;
@@ -40,6 +50,100 @@ type PlanSeed = {
 };
 
 const PLANS: PlanSeed[] = [
+  {
+    match:
+      /acme|agents sdk|launch brief|summarize what they shipped|save notes/i,
+    goalLabel: "Acme Agents SDK — research notes",
+    threadLabel: "Scout · computer",
+    workerModel: "Scout",
+    preferredDotId: "dot-scout",
+    memory: {
+      kind: "project",
+      text: "Researching Acme Agents SDK announcement for the Launch brief.",
+    },
+    steps: [
+      {
+        title: "Open Acme Agents SDK announcement",
+        kind: "browse",
+        detail: "Opening it on my computer.",
+        browse: {
+          title: "Acme Agents SDK",
+          url: "https://acme.dev/blog/agents-sdk",
+          content:
+            "Acme Agents SDK — Announcement\n\nShip hosted agents with tool calling and traces.\n• Hosted agent runtime\n• Tool calling + structured traces\n• No UI layer\n• No human-in-the-loop primitives\n• Agents run on Acme's servers only\n\nGet started with npm i @acme/agents",
+        },
+        result: "Opened acme.dev/blog/agents-sdk",
+        durationMs: 1400,
+      },
+      {
+        title: "Save research notes file",
+        kind: "file",
+        detail: "Saved file `~/notes/acme-agents-sdk.md` — 2.1 KB",
+        fileWrite: {
+          path: "~/notes/acme-agents-sdk.md",
+          sizeLabel: "2.1 KB",
+          content: `# Acme Agents SDK — notes
+
+Acme shipped a hosted agent runtime with tool calling and traces.
+
+Gaps vs OpenDots:
+- No UI layer
+- No human-in-the-loop primitives
+- Agents run on Acme's servers only
+
+Useful for Launch brief contrast section.`,
+        },
+        result: "Saved ~/notes/acme-agents-sdk.md",
+        durationMs: 1100,
+      },
+      {
+        title: "Verify note length",
+        kind: "shell",
+        detail: "Ran `wc -l ~/notes/acme-agents-sdk.md` → 41 lines",
+        terminal: {
+          command: "wc -l ~/notes/acme-agents-sdk.md",
+          output: "41 ~/notes/acme-agents-sdk.md",
+        },
+        result: "41 lines",
+        durationMs: 900,
+      },
+      {
+        title: "Save notes to Launch",
+        kind: "write",
+        detail: "Review before saving into the Launch space.",
+        requiresApproval: true,
+        review: {
+          title: "Review before saving: Acme Agents SDK — notes",
+          targetSpaceId: "space-launch",
+          summary:
+            "Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, no human-in-the-loop primitives, and agents run on Acme's servers only.",
+          body: `# Acme Agents SDK — notes
+
+Acme shipped a hosted agent runtime with tool calling and traces.
+
+## What they shipped
+- Hosted agent runtime
+- Tool calling
+- Structured traces
+
+## Gaps (for Launch brief)
+- No UI layer
+- No human-in-the-loop primitives
+- Agents run on Acme's servers only
+
+## How we win
+OpenDots keeps specialist Dots, Spaces, and a persistent computer you can take over.`,
+        },
+        result: "Notes saved to Launch",
+        durationMs: 700,
+      },
+    ],
+    artifact: `# Acme Agents SDK — notes
+
+Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, no human-in-the-loop primitives, and agents run on Acme's servers only.`,
+    reply: (name) =>
+      `${name} will open the announcement on my computer, save notes, and ask before dropping them into Launch.`,
+  },
   {
     match: /canvas|assignment|homework|due date|what's due|what is due|school/i,
     goalLabel: "Canvas due-date sweep",
@@ -642,11 +746,16 @@ async function createApproval(task: Task, step: TaskStep): Promise<Approval> {
     }
   });
   await addActivity("approval", `Needs your approval: ${step.title}`, task.id);
-  await addMessage(
-    "assistant",
-    `I need your go-ahead before I **${step.title.toLowerCase()}**.\n\n${step.detail ?? ""}\n\nApprove to continue, or reject and I'll stop there.`,
-    task.id,
-  );
+
+  if (step.review) {
+    await createReviewForStep(task, step, approval.id);
+  } else {
+    await addMessage(
+      "assistant",
+      `I need your go-ahead before I **${step.title.toLowerCase()}**.\n\n${step.detail ?? ""}\n\nApprove to continue, or reject and I'll stop there.`,
+      { taskId: task.id, dotId: task.dotId },
+    );
+  }
   return approval;
 }
 
@@ -742,13 +851,17 @@ async function runTaskLoop(
         break;
       }
 
+      let applyEffects = false;
       await updateState((s) => {
         const t = s.tasks.find((x) => x.id === taskId);
         if (!t) return;
         t.status = "running";
         t.updatedAt = new Date().toISOString();
         const st = t.steps[t.currentStepIndex];
-        if (st) st.status = "running";
+        if (st) {
+          applyEffects = st.status === "pending";
+          st.status = "running";
+        }
         s.agentStatus = "working";
         const standing = s.standingGoals.find((g) =>
           /deprecated|inventory/i.test(g.title),
@@ -760,6 +873,9 @@ async function runTaskLoop(
 
       await addActivity("work", step.title, taskId);
       await setComputerWorking(step.detail ?? step.title, step.browse);
+      if (applyEffects) {
+        await applyStepSideEffects(task, step);
+      }
 
       if (step.needsAuth) {
         const challengeId = randomUUID();
@@ -940,7 +1056,16 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     durationMs: s.durationMs,
     browse: s.browse,
     needsAuth: s.needsAuth,
+    fileWrite: s.fileWrite,
+    terminal: s.terminal,
+    review: s.review,
   }));
+
+  const preferredDotId =
+    plan.preferredDotId ?? state.selectedDotId ?? state.dots[0]?.id;
+  const activeDot =
+    state.dots.find((d) => d.id === preferredDotId) ?? state.dots[0];
+  const dotName = activeDot?.name ?? state.agentName;
 
   const task: Task = {
     id: randomUUID(),
@@ -952,17 +1077,28 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     updatedAt: now,
     plannedArtifact: plan.artifact,
     threadLabel: plan.threadLabel ?? "Cloud thread",
-    workerModel: plan.workerModel ?? "Astra",
+    workerModel: plan.workerModel ?? activeDot?.role ?? "Astra",
+    dotId: activeDot?.id,
   };
 
   await updateState((s) => {
     s.tasks.unshift(task);
     s.selectedTaskId = task.id;
+    s.selectedDotId = activeDot?.id ?? s.selectedDotId;
+    s.view = "chat";
     s.agentStatus = "thinking";
+    if (activeDot) {
+      s.agentName = activeDot.name;
+      s.avatarTone = toneToAvatar(activeDot.tone);
+      s.computer.status = "running";
+    }
   });
 
-  await addMessage("user", goal, task.id);
-  await addMessage("assistant", plan.reply(state.agentName), task.id);
+  await addMessage("user", goal, { taskId: task.id, dotId: activeDot?.id });
+  await addMessage("assistant", plan.reply(dotName), {
+    taskId: task.id,
+    dotId: activeDot?.id,
+  });
   await addActivity(
     plan.workerModel ? "orchestrate" : "work",
     plan.workerModel
@@ -1044,12 +1180,23 @@ export async function resolveApproval(
   });
 
   if (taskId) {
+    const state = await readState();
+    const approval = state.approvals.find((a) => a.id === approvalId);
+    if (approval?.reviewId) {
+      await saveReviewToSpace(approval.reviewId, decision === "approved");
+    }
+
     if (decision === "approved") {
       await addActivity("approval", "Approved — continuing work.", taskId);
+      const review = approval?.reviewId
+        ? state.reviews.find((r) => r.id === approval.reviewId)
+        : null;
       await addMessage(
         "assistant",
-        "Approved. Picking up where I left off.",
-        taskId,
+        review
+          ? `Approved · saved to ${review.targetSpaceName}.`
+          : "Approved. Picking up where I left off.",
+        { taskId, dotId: state.tasks.find((t) => t.id === taskId)?.dotId },
       );
       await resumeTask(taskId);
     } else {
@@ -1057,7 +1204,7 @@ export async function resolveApproval(
       await addMessage(
         "assistant",
         "Understood — I won't take that action. Tell me how you'd like to adjust.",
-        taskId,
+        { taskId, dotId: state.tasks.find((t) => t.id === taskId)?.dotId },
       );
     }
   }
