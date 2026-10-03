@@ -1,16 +1,18 @@
 # Dot — always-on agent workspace
 
-A Dots-inspired demo: chat with an always-on agent that keeps working in the background, remembers preferences, pauses for write approvals, and runs on a simulated cloud computer you can take over.
+A Dots-inspired demo shaped by OpenAI’s DevDay “Alfred” pattern: name your agent, watch it work on a cloud computer, pause for write/PR approvals, and keep standing goals alive between chats.
 
-## Features
+## What’s in the demo
 
-- **Chat + goals** — hand Dot a project; it plans multi-step work
-- **Background tasks** — steps keep running between messages (server-side)
-- **Approvals** — write actions pause until you approve or reject
-- **Cloud computer** — watch browser tabs/logs; **Take over** / **Return control**
-- **Memory** — preferences and project notes persist across sessions (local `.data/`)
+- **Create your Dot** — name + bubbly avatar (like Alfred)
+- **DevDay coding flow** — retire an inventory API: trace deps → update integrations → run tests → open PRs
+- **Approvals + custom rules** — Allow / Ask / Block for reads, tests, PRs, outbound mail
+- **Connected apps** — GitHub, Slack, Gmail, Notion toggles
+- **Standing goals** — continuous watches that flip to “acting” when work starts
+- **Cloud computer** — Take over / Return control
+- **Memory** — preferences that persist in `.data/`
 
-No API keys required — the agent uses a built-in planner for demo scenarios (coffee shop brief, invoice follow-ups, launch checklist, plus a generic path).
+No API keys required.
 
 ## Run locally
 
@@ -21,22 +23,13 @@ npm run dev
 
 Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
-## Scripts
-
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Dev server on port `43127` |
-| `npm run build` | Production build |
-| `npm run start` | Start production server |
-| `npm run lint` | ESLint |
-
 ## Try these prompts
 
-- Research three competitors for a neighborhood coffee shop and draft a one-page brief.
-- Pull overdue invoices and draft polite follow-up emails.
-- Build a product launch checklist I can reuse.
+1. **Remove the old inventory API before it gets shut down.** (primary DevDay-style demo)
+2. Research three competitors for a neighborhood coffee shop and draft a one-page brief.
+3. Pull overdue invoices and draft polite follow-up emails.
 
 ## Notes
 
 - Workspace state is stored in `.data/workspace.json` (gitignored).
-- Use **Reset** in the header to clear chat, tasks, and memory back to defaults.
+- Use **Reset** to return to the Create your Dot screen.

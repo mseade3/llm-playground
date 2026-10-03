@@ -3,6 +3,8 @@
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatPanel } from "@/components/chat-panel";
+import { DotAvatar } from "@/components/dot-avatar";
+import { Onboarding } from "@/components/onboarding";
 import { SidePanel } from "@/components/side-panel";
 import { StatusPill } from "@/components/status-pill";
 import { useWorkspace } from "@/hooks/use-workspace";
@@ -12,10 +14,13 @@ export function Workspace() {
     state,
     error,
     sending,
+    createDot,
     sendMessage,
     resolveApproval,
     setComputerMode,
     addMemory,
+    updateRule,
+    toggleApp,
     reset,
   } = useWorkspace();
 
@@ -25,7 +30,10 @@ export function Workspace() {
         <div className="max-w-md text-center">
           <h1 className="font-heading text-3xl text-stone-900">Dot</h1>
           <p className="mt-3 text-sm text-stone-600">{error}</p>
-          <Button className="mt-4 bg-teal-800 hover:bg-teal-700" onClick={() => window.location.reload()}>
+          <Button
+            className="mt-4 bg-teal-800 hover:bg-teal-700"
+            onClick={() => window.location.reload()}
+          >
             Retry
           </Button>
         </div>
@@ -41,10 +49,14 @@ export function Workspace() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-60" />
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal-600" />
           </span>
-          Waking Dot…
+          Waking your Dot…
         </div>
       </div>
     );
+  }
+
+  if (!state.onboarded) {
+    return <Onboarding onCreate={createDot} />;
   }
 
   return (
@@ -53,15 +65,17 @@ export function Workspace() {
 
       <header className="relative z-10 flex items-center justify-between gap-4 border-b border-stone-200/70 bg-white/40 px-4 py-3 backdrop-blur-md md:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-800 text-sm font-semibold text-teal-50 shadow-sm">
-            ●
-          </div>
+          <DotAvatar
+            tone={state.avatarTone}
+            status={state.agentStatus}
+            size="md"
+          />
           <div>
             <h1 className="font-heading text-2xl leading-none tracking-tight text-stone-900 md:text-[1.75rem]">
-              Dot
+              {state.agentName}
             </h1>
             <p className="mt-0.5 text-xs text-stone-500">
-              Always-on agent · cloud computer · asks before it writes
+              Your Dot · cloud computer · asks before it writes
             </p>
           </div>
         </div>
@@ -79,10 +93,13 @@ export function Workspace() {
         </div>
       </header>
 
-      <main className="relative z-10 grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+      <main className="relative z-10 grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.95fr)]">
         <ChatPanel
           messages={state.messages}
           sending={sending}
+          agentName={state.agentName}
+          avatarTone={state.avatarTone}
+          agentStatus={state.agentStatus}
           onSend={sendMessage}
         />
         <div className="hidden min-h-0 lg:block">
@@ -92,11 +109,12 @@ export function Workspace() {
             onReject={(id) => resolveApproval(id, "rejected")}
             onComputerMode={setComputerMode}
             onAddMemory={addMemory}
+            onUpdateRule={updateRule}
+            onToggleApp={toggleApp}
           />
         </div>
       </main>
 
-      {/* Mobile side panel as bottom sheet-like stack */}
       <div className="relative z-10 max-h-[42vh] border-t border-stone-200/80 lg:hidden">
         <SidePanel
           state={state}
@@ -104,6 +122,8 @@ export function Workspace() {
           onReject={(id) => resolveApproval(id, "rejected")}
           onComputerMode={setComputerMode}
           onAddMemory={addMemory}
+          onUpdateRule={updateRule}
+          onToggleApp={toggleApp}
         />
       </div>
     </div>

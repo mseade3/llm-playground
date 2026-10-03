@@ -9,14 +9,19 @@ import {
   Activity,
   X,
   Plus,
+  GitPullRequest,
+  Shield,
+  Plug,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { WorkspaceState } from "@/lib/types";
+import type { RuleMode, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const RULE_MODES: RuleMode[] = ["allow", "ask", "block"];
 
 export function SidePanel({
   state,
@@ -24,6 +29,8 @@ export function SidePanel({
   onReject,
   onComputerMode,
   onAddMemory,
+  onUpdateRule,
+  onToggleApp,
 }: {
   state: WorkspaceState;
   onApprove: (id: string) => Promise<void>;
@@ -33,33 +40,41 @@ export function SidePanel({
     kind: "preference" | "decision" | "project" | "fact",
     text: string,
   ) => Promise<void>;
+  onUpdateRule: (ruleId: string, mode: RuleMode) => Promise<void>;
+  onToggleApp: (appId: string) => Promise<void>;
 }) {
   const [memoryText, setMemoryText] = useState("");
-  const activeTab = state.computer.tabs.find((t) => t.active) ?? state.computer.tabs[0];
+  const activeTab =
+    state.computer.tabs.find((t) => t.active) ?? state.computer.tabs[0];
   const pending = state.approvals.filter((a) => a.status === "pending");
   const activeTask = state.tasks.find((t) =>
     ["running", "waiting_approval", "paused", "queued"].includes(t.status),
   );
+  const focusTask = activeTask ?? state.tasks[0];
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-l border-stone-200/80 bg-white/50 backdrop-blur">
       <Tabs defaultValue="computer" className="flex h-full min-h-0 flex-col">
-        <div className="border-b border-stone-200/70 px-3 pt-3">
-          <TabsList className="grid w-full grid-cols-4 bg-stone-100/80">
-            <TabsTrigger value="computer" className="text-xs">
-              <Monitor className="mr-1 h-3.5 w-3.5" />
+        <div className="border-b border-stone-200/70 px-2 pt-3">
+          <TabsList className="grid w-full grid-cols-5 bg-stone-100/80">
+            <TabsTrigger value="computer" className="px-1 text-[10px] sm:text-xs">
+              <Monitor className="mr-0.5 h-3.5 w-3.5" />
               Comp
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="text-xs">
-              <ListTodo className="mr-1 h-3.5 w-3.5" />
+            <TabsTrigger value="tasks" className="px-1 text-[10px] sm:text-xs">
+              <ListTodo className="mr-0.5 h-3.5 w-3.5" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="memory" className="text-xs">
-              <Brain className="mr-1 h-3.5 w-3.5" />
+            <TabsTrigger value="rules" className="px-1 text-[10px] sm:text-xs">
+              <Shield className="mr-0.5 h-3.5 w-3.5" />
+              Rules
+            </TabsTrigger>
+            <TabsTrigger value="memory" className="px-1 text-[10px] sm:text-xs">
+              <Brain className="mr-0.5 h-3.5 w-3.5" />
               Memory
             </TabsTrigger>
-            <TabsTrigger value="activity" className="text-xs">
-              <Activity className="mr-1 h-3.5 w-3.5" />
+            <TabsTrigger value="activity" className="px-1 text-[10px] sm:text-xs">
+              <Activity className="mr-0.5 h-3.5 w-3.5" />
               Live
             </TabsTrigger>
           </TabsList>
@@ -69,7 +84,9 @@ export function SidePanel({
           <div className="flex h-full min-h-0 flex-col p-3">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-stone-800">Cloud computer</p>
+                <p className="text-sm font-medium text-stone-800">
+                  Cloud computer
+                </p>
                 <p className="text-xs text-stone-500">
                   {state.computer.currentAction ?? "Idle"}
                 </p>
@@ -90,6 +107,26 @@ export function SidePanel({
               >
                 {state.computer.mode === "user" ? "Return control" : "Take over"}
               </Button>
+            </div>
+
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {state.apps.map((app) => (
+                <button
+                  key={app.id}
+                  type="button"
+                  onClick={() => void onToggleApp(app.id)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ring-1 transition",
+                    app.connected
+                      ? "bg-teal-50 text-teal-900 ring-teal-200"
+                      : "bg-stone-50 text-stone-500 ring-stone-200",
+                  )}
+                  title={app.detail}
+                >
+                  <Plug className="h-2.5 w-2.5" />
+                  {app.name}
+                </button>
+              ))}
             </div>
 
             <div className="mb-2 flex gap-1 overflow-x-auto">
@@ -125,28 +162,48 @@ export function SidePanel({
                   <h3 className="font-heading text-lg text-stone-900">
                     {activeTab?.title}
                   </h3>
-                  <p className="whitespace-pre-wrap">{activeTab?.content}</p>
+                  <p className="whitespace-pre-wrap font-mono text-xs leading-relaxed md:text-[13px]">
+                    {activeTab?.content}
+                  </p>
                   {state.computer.mode === "user" && (
                     <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
-                      You have control. Dot is paused until you return it.
+                      You have control. {state.agentName} is paused until you
+                      return it.
                     </p>
                   )}
                 </div>
               </ScrollArea>
             </div>
 
-            <div className="mt-3 max-h-24 overflow-hidden">
-              <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-stone-400">
-                Computer log
-              </p>
-              <ul className="space-y-1 text-[11px] text-stone-500">
-                {state.computer.logs.slice(0, 4).map((log, i) => (
-                  <li key={`${log}-${i}`} className="truncate">
-                    • {log}
-                  </li>
+            {state.standingGoals.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-stone-400">
+                  Standing goals
+                </p>
+                {state.standingGoals.map((goal) => (
+                  <div
+                    key={goal.id}
+                    className="flex items-start justify-between gap-2 rounded-lg bg-white/70 px-2.5 py-2 ring-1 ring-stone-200/80"
+                  >
+                    <div>
+                      <p className="text-xs font-medium text-stone-800">
+                        {goal.title}
+                      </p>
+                      <p className="text-[10px] text-stone-500">{goal.cadence}</p>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "text-[10px] capitalize",
+                        goal.status === "acting" && "bg-teal-100 text-teal-900",
+                      )}
+                    >
+                      {goal.status}
+                    </Badge>
+                  </div>
                 ))}
-              </ul>
-            </div>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -193,33 +250,43 @@ export function SidePanel({
                 </div>
               )}
 
-              {activeTask ? (
+              {focusTask ? (
                 <div className="rounded-xl border border-stone-200 bg-white/80 p-3">
                   <div className="mb-2 flex items-start justify-between gap-2">
                     <p className="text-sm font-medium text-stone-900">
-                      {activeTask.goal}
+                      {focusTask.goal}
                     </p>
-                    <Badge variant="secondary" className="text-[10px] capitalize">
-                      {activeTask.status.replace("_", " ")}
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] capitalize"
+                    >
+                      {focusTask.status.replace("_", " ")}
                     </Badge>
                   </div>
                   <ol className="space-y-2">
-                    {activeTask.steps.map((step, index) => (
-                      <li key={step.id} className="flex items-start gap-2 text-xs">
+                    {focusTask.steps.map((step, index) => (
+                      <li
+                        key={step.id}
+                        className="flex items-start gap-2 text-xs"
+                      >
                         <span
                           className={cn(
                             "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px]",
                             step.status === "done" && "bg-teal-700 text-white",
                             step.status === "running" &&
                               "animate-pulse bg-teal-200 text-teal-900",
-                            step.status === "pending" && "bg-stone-200 text-stone-500",
-                            step.status === "skipped" && "bg-stone-300 text-stone-600",
+                            step.status === "pending" &&
+                              "bg-stone-200 text-stone-500",
+                            step.status === "skipped" &&
+                              "bg-stone-300 text-stone-600",
                           )}
                         >
                           {step.status === "done" ? "✓" : index + 1}
                         </span>
                         <div>
-                          <p className="font-medium text-stone-800">{step.title}</p>
+                          <p className="font-medium text-stone-800">
+                            {step.title}
+                          </p>
                           {step.detail && (
                             <p className="text-stone-500">{step.detail}</p>
                           )}
@@ -227,33 +294,96 @@ export function SidePanel({
                       </li>
                     ))}
                   </ol>
-                  {activeTask.artifact && (
-                    <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-stone-50 p-3 text-[11px] leading-relaxed text-stone-700 ring-1 ring-stone-200">
-                      {activeTask.artifact}
-                    </pre>
+
+                  {focusTask.pullRequests && focusTask.pullRequests.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-stone-400">
+                        <GitPullRequest className="h-3 w-3" />
+                        Pull requests
+                      </p>
+                      {focusTask.pullRequests.map((pr) => (
+                        <div
+                          key={pr.id}
+                          className="rounded-lg border border-stone-200 bg-stone-50/80 p-2.5"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-xs font-medium text-stone-900">
+                              #{pr.number} {pr.title}
+                            </p>
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] capitalize"
+                            >
+                              {pr.status}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-[11px] text-stone-500">
+                            {pr.repo} · {pr.branch} · {pr.filesChanged} files
+                          </p>
+                          <p className="mt-1 text-[11px] text-stone-600">
+                            {pr.summary}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </div>
-              ) : state.tasks[0] ? (
-                <div className="rounded-xl border border-stone-200 bg-white/80 p-3">
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium text-stone-900">
-                      {state.tasks[0].goal}
-                    </p>
-                    <Badge variant="secondary" className="text-[10px] capitalize">
-                      {state.tasks[0].status}
-                    </Badge>
-                  </div>
-                  {state.tasks[0].artifact && (
-                    <pre className="max-h-72 overflow-auto whitespace-pre-wrap rounded-lg bg-stone-50 p-3 text-[11px] leading-relaxed text-stone-700 ring-1 ring-stone-200">
-                      {state.tasks[0].artifact}
+
+                  {focusTask.artifact && (
+                    <pre className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg bg-stone-50 p-3 text-[11px] leading-relaxed text-stone-700 ring-1 ring-stone-200">
+                      {focusTask.artifact}
                     </pre>
                   )}
                 </div>
               ) : (
                 <p className="px-1 py-8 text-center text-sm text-stone-500">
-                  No active tasks yet. Give Dot a goal in chat.
+                  No active tasks yet. Give {state.agentName} a goal in chat.
                 </p>
               )}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="rules" className="mt-0 min-h-0 flex-1">
+          <ScrollArea className="h-full">
+            <div className="space-y-3 p-3">
+              <p className="text-xs text-stone-500">
+                Custom rules decide when {state.agentName} can act alone, must
+                ask, or must stop — same idea as Dots Auto-review defaults.
+              </p>
+              {state.rules.map((rule) => (
+                <div
+                  key={rule.id}
+                  className="rounded-xl border border-stone-200 bg-white/80 p-3"
+                >
+                  <p className="text-sm font-medium text-stone-900">
+                    {rule.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-stone-500">
+                    {rule.description}
+                  </p>
+                  <div className="mt-2 flex gap-1">
+                    {RULE_MODES.map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => void onUpdateRule(rule.id, mode)}
+                        className={cn(
+                          "rounded-md px-2 py-1 text-[11px] capitalize ring-1 transition",
+                          rule.mode === mode
+                            ? mode === "allow"
+                              ? "bg-teal-800 text-white ring-teal-800"
+                              : mode === "ask"
+                                ? "bg-amber-600 text-white ring-amber-600"
+                                : "bg-stone-800 text-white ring-stone-800"
+                            : "bg-white text-stone-600 ring-stone-200 hover:bg-stone-50",
+                        )}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -272,7 +402,7 @@ export function SidePanel({
               <Input
                 value={memoryText}
                 onChange={(e) => setMemoryText(e.target.value)}
-                placeholder="Add a preference Dot should remember…"
+                placeholder={`Add a preference ${state.agentName} should remember…`}
                 className="h-9 rounded-lg bg-white text-sm"
               />
               <Button
@@ -313,7 +443,10 @@ export function SidePanel({
                   className="rounded-xl border border-stone-200/80 bg-white/70 px-3 py-2"
                 >
                   <div className="mb-0.5 flex items-center justify-between gap-2">
-                    <Badge variant="secondary" className="text-[10px] capitalize">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] capitalize"
+                    >
                       {event.type}
                     </Badge>
                     <time className="text-[10px] text-stone-400">

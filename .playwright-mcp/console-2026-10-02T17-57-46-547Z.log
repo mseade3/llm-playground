@@ -1,0 +1,64 @@
+[     207ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[     292ms] [LOG] [HMR] connected @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83543384ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83543471ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83544371ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83545271ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83546172ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83547071ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83547971ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83548871ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83549771ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83550671ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83551572ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83552472ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83553376ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83554272ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83555172ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83556071ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83556971ms] [LOG] [Fast Refresh] done in 30808ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83557528ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83557658ms] [LOG] [Fast Refresh] done in 229ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566112ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566141ms] [LOG] [Fast Refresh] done in 2ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566268ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566310ms] TypeError: Cannot read properties of undefined (reading 'replace')
+    at ChatPanel (http://127.0.0.1:43127/_next/static/chunks/src_0jmmw6f._.js?id=%255Bproject%255D/src/components/chat-panel.tsx+%255Bapp-client%255D+(ecmascript):264:45)
+    at Object.react_stack_bottom_frame (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14894:24)
+    at renderWithHooks (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4425:24)
+    at updateFunctionComponent (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5892:21)
+    at beginWork (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6518:24)
+    at runWithFiberInDEV (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)
+    at performUnitOfWork (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9385:97)
+    at workLoopSync (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9279:40)
+    at renderRootSync (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9263:13)
+    at performWorkOnRoot (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8928:47)
+    at performSyncWorkOnRoot (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10093:9)
+    at flushSyncWorkAcrossRoots_impl (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10009:316)
+    at processRootScheduleInMicrotask (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10030:106)
+    at http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10104:158
+[83566323ms] [LOG] [Fast Refresh] done in 20ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566360ms] [LOG] [Fast Refresh] done in 20ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83566412ms] [LOG] [Fast Refresh] done in 20ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594561ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594563ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594681ms] [LOG] [Fast Refresh] done in 3ms @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594835ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594863ms] [LOG] [HMR] connected @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83594911ms] TypeError: Cannot read properties of undefined (reading 'replace')
+    at ChatPanel (http://127.0.0.1:43127/_next/static/chunks/src_0jmmw6f._.js:265:45)
+    at Object.react_stack_bottom_frame (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14894:24)
+    at renderWithHooks (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4425:24)
+    at updateFunctionComponent (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:5892:21)
+    at beginWork (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6518:24)
+    at runWithFiberInDEV (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)
+    at performUnitOfWork (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9385:97)
+    at workLoopSync (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9279:40)
+    at renderRootSync (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9263:13)
+    at performWorkOnRoot (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8928:47)
+    at performWorkOnRootViaSchedulerTask (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10085:9)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[83599179ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83599180ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83599246ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776
+[83599258ms] [LOG] [HMR] connected @ http://127.0.0.1:43127/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js:776

@@ -17,7 +17,7 @@ const instrument = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Dot — always-on agent workspace",
   description:
-    "A Dots-inspired always-on agent with background tasks, memory, approvals, and a cloud computer you can take over.",
+    "Name your Dot, hand it goals like retiring an inventory API, watch PRs open on a cloud computer, and approve the steps that need you.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

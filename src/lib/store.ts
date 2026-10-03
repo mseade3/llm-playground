@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import type {
   ActivityEvent,
   Approval,
+  AvatarTone,
   ComputerState,
   MemoryNote,
   Message,
@@ -14,7 +15,7 @@ import type {
 const DATA_DIR = path.join(process.cwd(), ".data");
 const STATE_FILE = path.join(DATA_DIR, "workspace.json");
 
-function defaultComputer(): ComputerState {
+function defaultComputer(name: string): ComputerState {
   return {
     mode: "agent",
     status: "idle",
@@ -22,10 +23,9 @@ function defaultComputer(): ComputerState {
     tabs: [
       {
         id: "home",
-        title: "Dot Computer",
+        title: `${name}'s Computer`,
         url: "about:blank",
-        content:
-          "Your Dot's cloud computer is ready. Give it a goal and it will open tabs, research, and draft work here.",
+        content: `${name}'s cloud computer is ready — browser, shell, and repo access. Hand over a goal and watch the work land here.`,
         active: true,
       },
     ],
@@ -33,47 +33,149 @@ function defaultComputer(): ComputerState {
   };
 }
 
-function defaultState(): WorkspaceState {
+function defaultRules() {
+  return [
+    {
+      id: "rule-read",
+      label: "Read repos & docs",
+      description: "Browse code, issues, and research without asking.",
+      mode: "allow" as const,
+    },
+    {
+      id: "rule-tests",
+      label: "Run tests",
+      description: "Execute test suites on the cloud computer.",
+      mode: "allow" as const,
+    },
+    {
+      id: "rule-pr",
+      label: "Open pull requests",
+      description: "Push branches and open PRs on connected GitHub.",
+      mode: "ask" as const,
+    },
+    {
+      id: "rule-send",
+      label: "Send messages externally",
+      description: "Email, Slack, or Teams outbound messages.",
+      mode: "ask" as const,
+    },
+    {
+      id: "rule-delete",
+      label: "Delete production data",
+      description: "Destructive writes against live systems.",
+      mode: "block" as const,
+    },
+  ];
+}
+
+function defaultApps() {
+  return [
+    {
+      id: "github",
+      name: "GitHub",
+      connected: true,
+      detail: "Repos + PRs",
+    },
+    {
+      id: "slack",
+      name: "Slack",
+      connected: true,
+      detail: "Notify on decisions",
+    },
+    {
+      id: "gmail",
+      name: "Gmail",
+      connected: false,
+      detail: "Connect to draft replies",
+    },
+    {
+      id: "notion",
+      name: "Notion",
+      connected: false,
+      detail: "Docs & briefs",
+    },
+  ];
+}
+
+function defaultStandingGoals() {
+  return [
+    {
+      id: "sg-deps",
+      title: "Watch for deprecated APIs in inventory services",
+      cadence: "Continuous",
+      status: "watching" as const,
+    },
+    {
+      id: "sg-inbox",
+      title: "Surface urgent customer emails before standup",
+      cadence: "Weekdays 8:30am",
+      status: "paused" as const,
+    },
+  ];
+}
+
+export function defaultState(): WorkspaceState {
   const now = new Date().toISOString();
   return {
-    agentName: "Dot",
+    onboarded: false,
+    agentName: "Alfred",
+    avatarTone: "teal",
     agentStatus: "idle",
-    messages: [
-      {
-        id: randomUUID(),
-        role: "assistant",
-        content:
-          "I'm Dot — your always-on agent. Hand me a project and I'll keep working between messages, pause when I need your judgment, and remember how you like things done.\n\nTry: “Research three competitors for a neighborhood coffee shop and draft a one-page brief.”",
-        createdAt: now,
-      },
-    ],
+    messages: [],
     tasks: [],
     approvals: [],
     memory: [
       {
         id: randomUUID(),
         kind: "preference",
-        text: "Prefer concise briefs with clear next steps.",
+        text: "Prefer small PRs with clear summaries over giant diffs.",
         createdAt: now,
         updatedAt: now,
       },
       {
         id: randomUUID(),
         kind: "preference",
-        text: "Ask before sending messages or publishing anything external.",
+        text: "Ask before opening pull requests or sending external messages.",
         createdAt: now,
         updatedAt: now,
       },
     ],
-    computer: defaultComputer(),
+    rules: defaultRules(),
+    apps: defaultApps(),
+    standingGoals: defaultStandingGoals(),
+    computer: defaultComputer("Alfred"),
     activity: [
       {
         id: randomUUID(),
         type: "info",
-        text: "Dot is online and listening.",
+        text: "Create your Dot to get started.",
         createdAt: now,
       },
     ],
+  };
+}
+
+function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): WorkspaceState {
+  const base = defaultState();
+  const name = raw.agentName || base.agentName;
+  return {
+    ...base,
+    ...raw,
+    onboarded: raw.onboarded ?? Boolean(raw.messages && raw.messages.length > 0),
+    agentName: name,
+    avatarTone: (raw.avatarTone as AvatarTone) || base.avatarTone,
+    rules: raw.rules?.length ? raw.rules : base.rules,
+    apps: raw.apps?.length ? raw.apps : base.apps,
+    standingGoals: raw.standingGoals?.length
+      ? raw.standingGoals
+      : base.standingGoals,
+    computer: raw.computer ?? defaultComputer(name),
+    messages: raw.messages ?? [],
+    tasks: raw.tasks ?? [],
+    approvals: raw.approvals ?? [],
+    memory: raw.memory?.length ? raw.memory : base.memory,
+    activity: raw.activity?.length ? raw.activity : base.activity,
+    agentStatus: raw.agentStatus ?? "idle",
   };
 }
 
@@ -89,7 +191,7 @@ export async function readState(): Promise<WorkspaceState> {
   await ensureDataDir();
   try {
     const raw = await fs.readFile(STATE_FILE, "utf8");
-    cache = JSON.parse(raw) as WorkspaceState;
+    cache = migrate(JSON.parse(raw) as Partial<WorkspaceState>);
     return cache;
   } catch {
     cache = defaultState();
@@ -197,6 +299,39 @@ export async function getApproval(
 ): Promise<Approval | undefined> {
   const state = await readState();
   return state.approvals.find((a) => a.id === approvalId);
+}
+
+export async function createDot(
+  name: string,
+  avatarTone: AvatarTone,
+): Promise<WorkspaceState> {
+  const trimmed = name.trim().slice(0, 24) || "Alfred";
+  const now = new Date().toISOString();
+  cache = {
+    ...defaultState(),
+    onboarded: true,
+    agentName: trimmed,
+    avatarTone,
+    computer: defaultComputer(trimmed),
+    messages: [
+      {
+        id: randomUUID(),
+        role: "assistant",
+        content: `I'm ${trimmed} — your always-on Dot. I keep projects moving on my cloud computer, learn how you like things done, and pause when a decision needs you.\n\nTry the DevDay classic: “Remove the old inventory API before it gets shut down.”`,
+        createdAt: now,
+      },
+    ],
+    activity: [
+      {
+        id: randomUUID(),
+        type: "info",
+        text: `${trimmed} is online and listening.`,
+        createdAt: now,
+      },
+    ],
+  };
+  await persist(cache);
+  return cache;
 }
 
 export async function resetWorkspace(): Promise<WorkspaceState> {

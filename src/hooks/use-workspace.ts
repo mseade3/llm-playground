@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { WorkspaceState } from "@/lib/types";
+import type { AvatarTone, RuleMode, WorkspaceState } from "@/lib/types";
 
 async function fetchState(): Promise<WorkspaceState> {
   const res = await fetch("/api/state", { cache: "no-store" });
@@ -40,6 +40,16 @@ export function useWorkspace() {
       window.clearInterval(id);
     };
   }, [refresh]);
+
+  const createDot = useCallback(async (name: string, avatarTone: AvatarTone) => {
+    const res = await fetch("/api/onboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, avatarTone }),
+    });
+    if (!res.ok) throw new Error("Failed to create Dot");
+    setState(await res.json());
+  }, []);
 
   const sendMessage = useCallback(async (message: string) => {
     setSending(true);
@@ -81,7 +91,10 @@ export function useWorkspace() {
   }, []);
 
   const addMemory = useCallback(
-    async (kind: "preference" | "decision" | "project" | "fact", text: string) => {
+    async (
+      kind: "preference" | "decision" | "project" | "fact",
+      text: string,
+    ) => {
       const res = await fetch("/api/memory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,6 +105,26 @@ export function useWorkspace() {
     },
     [],
   );
+
+  const updateRule = useCallback(async (ruleId: string, mode: RuleMode) => {
+    const res = await fetch("/api/rules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ruleId, mode }),
+    });
+    if (!res.ok) throw new Error("Failed to update rule");
+    setState(await res.json());
+  }, []);
+
+  const toggleApp = useCallback(async (appId: string) => {
+    const res = await fetch("/api/apps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appId }),
+    });
+    if (!res.ok) throw new Error("Failed to toggle app");
+    setState(await res.json());
+  }, []);
 
   const reset = useCallback(async () => {
     const res = await fetch("/api/state", { method: "DELETE" });
@@ -104,10 +137,13 @@ export function useWorkspace() {
     error,
     sending,
     refresh,
+    createDot,
     sendMessage,
     resolveApproval,
     setComputerMode,
     addMemory,
+    updateRule,
+    toggleApp,
     reset,
   };
 }

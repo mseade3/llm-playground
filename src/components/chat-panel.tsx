@@ -1,17 +1,18 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { Message } from "@/lib/types";
+import { DotAvatar } from "@/components/dot-avatar";
+import type { AvatarTone, Message, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
+  "Remove the old inventory API before it gets shut down.",
   "Research three competitors for a neighborhood coffee shop and draft a one-page brief.",
   "Pull overdue invoices and draft polite follow-up emails.",
-  "Build a product launch checklist I can reuse.",
 ];
 
 function renderContent(content: string) {
@@ -34,13 +35,20 @@ function renderContent(content: string) {
 export function ChatPanel({
   messages,
   sending,
+  agentName,
+  avatarTone,
+  agentStatus,
   onSend,
 }: {
   messages: Message[];
   sending: boolean;
+  agentName: string;
+  avatarTone: AvatarTone;
+  agentStatus: WorkspaceState["agentStatus"];
   onSend: (message: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState("");
+  const [callNote, setCallNote] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,9 +84,9 @@ export function ChatPanel({
                 )}
               >
                 {message.role === "assistant" && (
-                  <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-teal-700">
-                    <Sparkles className="h-3 w-3" />
-                    Dot
+                  <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-teal-700">
+                    <DotAvatar tone={avatarTone} size="sm" className="!h-5 !w-5" />
+                    {agentName}
                   </div>
                 )}
                 {renderContent(message.content)}
@@ -87,7 +95,7 @@ export function ChatPanel({
           ))}
           {sending && (
             <div className="self-start rounded-2xl rounded-bl-md bg-white/80 px-4 py-3 text-sm text-stone-500 shadow-sm ring-1 ring-stone-200/80">
-              Dot is picking up the thread…
+              {agentName} is picking up the thread…
             </div>
           )}
           <div ref={endRef} />
@@ -110,13 +118,18 @@ export function ChatPanel({
               ))}
             </div>
           )}
+          {callNote && (
+            <p className="mb-2 rounded-lg bg-teal-50 px-3 py-2 text-xs text-teal-900 ring-1 ring-teal-100">
+              {callNote}
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="relative">
             <Textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Hand Dot a goal…"
+              placeholder={`Hand ${agentName} a goal…`}
               rows={2}
-              className="min-h-[72px] resize-none rounded-2xl border-stone-200 bg-white pr-14 text-sm shadow-sm"
+              className="min-h-[72px] resize-none rounded-2xl border-stone-200 bg-white pr-24 text-sm shadow-sm"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -124,15 +137,36 @@ export function ChatPanel({
                 }
               }}
             />
-            <Button
-              type="submit"
-              size="icon"
-              disabled={!draft.trim() || sending}
-              className="absolute bottom-3 right-3 h-9 w-9 rounded-xl bg-teal-800 text-white hover:bg-teal-700"
-            >
-              <ArrowUp className="h-4 w-4" />
-            </Button>
+            <div className="absolute bottom-3 right-3 flex gap-1.5">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="h-9 w-9 rounded-xl border-stone-200 bg-white"
+                title={`Call ${agentName}`}
+                onClick={() => {
+                  setCallNote(
+                    `Voice is a stub in this demo — message ${agentName} in chat the same way you'd talk through a change of direction.`,
+                  );
+                  window.setTimeout(() => setCallNote(null), 4200);
+                }}
+              >
+                <Phone className="h-4 w-4 text-teal-800" />
+              </Button>
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!draft.trim() || sending}
+                className="h-9 w-9 rounded-xl bg-teal-800 text-white hover:bg-teal-700"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+            </div>
           </form>
+          <p className="mt-2 text-[11px] text-stone-400">
+            Status: {agentStatus.replace("_", " ")} · works between messages on a
+            cloud computer
+          </p>
         </div>
       </div>
     </section>

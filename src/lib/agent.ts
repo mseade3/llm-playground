@@ -10,6 +10,7 @@ import {
 import type {
   Approval,
   BrowserTab,
+  PullRequest,
   Task,
   TaskStep,
   WorkspaceState,
@@ -31,10 +32,115 @@ type PlanSeed = {
     durationMs: number;
   }>;
   artifact: string;
-  reply: string;
+  pullRequests?: Array<Omit<PullRequest, "id" | "taskId" | "createdAt">>;
+  reply: (name: string) => string;
 };
 
 const PLANS: PlanSeed[] = [
+  {
+    match: /inventory|api|deprecate|pull request|pr\b|repo|dependency|codex/i,
+    goalLabel: "Retire old inventory API",
+    memory: {
+      kind: "project",
+      text: "Retiring the legacy inventory API before shutdown.",
+    },
+    steps: [
+      {
+        title: "Trace inventory API dependencies",
+        kind: "code",
+        detail: "Mapping callers across checkout, warehouse, and admin services.",
+        browse: {
+          title: "repo · inventory-api",
+          url: "https://github.com/acme/commerce/tree/main/services/inventory-api",
+          content:
+            "Legacy endpoint: GET /v1/inventory/:sku\nCallers found:\n• checkout-service (12 refs)\n• warehouse-worker (4 refs)\n• admin-dashboard (2 refs)\nReplacement: inventory-gateway /v2/stock\nShutdown window: Friday 18:00 UTC",
+        },
+        result: "Found 18 call sites across 3 services.",
+        durationMs: 1500,
+      },
+      {
+        title: "Update integrations to /v2",
+        kind: "code",
+        detail: "Rewriting clients onto inventory-gateway and removing dead feature flags.",
+        browse: {
+          title: "diff · checkout-service",
+          url: "https://github.com/acme/commerce/compare/retire-inventory-v1",
+          content:
+            "checkout-service/src/inventory.ts\n- fetch('/v1/inventory/' + sku)\n+ fetch('/v2/stock?sku=' + sku)\n\nwarehouse-worker/jobs/sync.ts\n- InventoryClient.legacyGet(sku)\n+ InventoryGateway.getStock(sku)\n\n3 feature flags marked for deletion.",
+        },
+        result: "Updated integrations in checkout, warehouse, and admin.",
+        durationMs: 1800,
+      },
+      {
+        title: "Run test suite",
+        kind: "test",
+        detail: "Running unit + contract tests on the cloud computer.",
+        browse: {
+          title: "tests · cloud shell",
+          url: "dot://computer/shell",
+          content:
+            "$ pnpm test --filter=inventory*\n✓ checkout-service 42 passed\n✓ warehouse-worker 18 passed\n✓ admin-dashboard 9 passed\n✓ contract: inventory-gateway 6 passed\n\nAll green in 41.2s",
+        },
+        result: "75 tests passed across affected packages.",
+        durationMs: 1600,
+      },
+      {
+        title: "Open three pull requests",
+        kind: "pr",
+        detail: "Push branches and open PRs for checkout, warehouse, and admin.",
+        requiresApproval: true,
+        result: "Opened 3 PRs ready for human review.",
+        durationMs: 1100,
+      },
+    ],
+    pullRequests: [
+      {
+        number: 841,
+        title: "chore(checkout): migrate inventory client to /v2",
+        repo: "acme/commerce",
+        branch: "retire-inventory-v1-checkout",
+        summary: "Swaps legacy /v1 inventory calls for inventory-gateway and drops unused flags.",
+        filesChanged: 6,
+        status: "ready",
+      },
+      {
+        number: 842,
+        title: "chore(warehouse): use InventoryGateway.getStock",
+        repo: "acme/commerce",
+        branch: "retire-inventory-v1-warehouse",
+        summary: "Updates sync jobs and contract fixtures for the v2 stock API.",
+        filesChanged: 4,
+        status: "ready",
+      },
+      {
+        number: 843,
+        title: "chore(admin): remove inventory v1 debug panel",
+        repo: "acme/commerce",
+        branch: "retire-inventory-v1-admin",
+        summary: "Deletes the deprecated SKU inspector and points UI at /v2.",
+        filesChanged: 3,
+        status: "draft",
+      },
+    ],
+    artifact: `# Retire inventory API — handoff
+
+## What changed
+- Traced 18 call sites across checkout, warehouse, and admin
+- Migrated clients to \`inventory-gateway /v2/stock\`
+- Tests green (75 passed)
+
+## Pull requests
+1. #841 checkout migration — ready for review
+2. #842 warehouse migration — ready for review
+3. #843 admin cleanup — draft
+
+## Still needs a human
+- Confirm Friday shutdown window with platform
+- Merge order: checkout → warehouse → admin
+- Monitor error budgets for 2 hours post-merge`,
+    reply: (name) =>
+      `On it. I'll trace the inventory API, update the integrations, run tests, then pause before opening PRs — same shape as the DevDay Alfred demo, just with me (${name}) doing the work.`,
+  },
   {
     match: /coffee|cafe|café|competitor/i,
     goalLabel: "Coffee shop competitive brief",
@@ -88,17 +194,12 @@ const PLANS: PlanSeed[] = [
 3. **Metro Drip** — Fast espresso for commuters, thin midday offer.
 
 ## Opportunity
-Own the **weekday focus cafe**: quieter seating, reliable Wi‑Fi, simple membership (coffee + reserved seat), and a midday lunch set that Metro Drip lacks.
-
-## Next steps
-- Mystery-shop Harbor Roast at 10am and 2pm.
-- Price a monthly membership at $49–$69.
-- Prototype a 3-item midday menu before lease negotiations.`,
-    reply:
-      "I'm on it — researching local cafe competitors and drafting a one-page brief. I'll keep working in the background and ask before I save anything.",
+Own the **weekday focus cafe**: quieter seating, reliable Wi‑Fi, simple membership, and a midday lunch set.`,
+    reply: (name) =>
+      `${name} on research — I'll draft a one-page brief and ask before I save anything lasting.`,
   },
   {
-    match: /invoice|billing|accounts? payable/i,
+    match: /invoice|billing|accounts? payable|email/i,
     goalLabel: "Invoice follow-up pack",
     memory: {
       kind: "project",
@@ -113,7 +214,7 @@ Own the **weekday focus cafe**: quieter seating, reliable Wi‑Fi, simple member
           title: "Receivables",
           url: "https://apps.dot/billing/overdue",
           content:
-            "Overdue: Acme Studio $2,400 (12d), Northline Co $880 (21d), Bright Harbor $1,150 (7d). Prefer polite tone; escalate after 14 days.",
+            "Overdue: Acme Studio $2,400 (12d), Northline Co $880 (21d), Bright Harbor $1,150 (7d).",
         },
         result: "Found 3 overdue invoices totaling $4,430.",
         durationMs: 1200,
@@ -136,63 +237,11 @@ Own the **weekday focus cafe**: quieter seating, reliable Wi‑Fi, simple member
     ],
     artifact: `# Invoice Follow-ups
 
-**Acme Studio — $2,400 (12 days)**
-Subject: Friendly nudge on invoice #1042
-Body: Quick check-in on invoice #1042 for $2,400. Happy to resend the PDF or adjust payment details if needed.
-
-**Northline Co — $880 (21 days)**
-Subject: Overdue invoice #991 — please advise
-Body: Invoice #991 is 21 days past due. Can you confirm status or a date we should expect payment?
-
-**Bright Harbor — $1,150 (7 days)**
-Subject: Invoice #1108 reminder
-Body: Just a soft reminder that invoice #1108 for $1,150 came due last week.`,
-    reply:
+**Acme Studio — $2,400** · Friendly nudge on invoice #1042
+**Northline Co — $880** · Overdue invoice #991 — please advise
+**Bright Harbor — $1,150** · Soft reminder on invoice #1108`,
+    reply: () =>
       "I'll gather the overdue invoices, draft follow-ups, and pause before anything is queued to send.",
-  },
-  {
-    match: /launch|product|roadmap|changelog/i,
-    goalLabel: "Launch checklist",
-    memory: {
-      kind: "project",
-      text: "Building a product launch checklist.",
-    },
-    steps: [
-      {
-        title: "Collect launch inputs",
-        kind: "research",
-        detail: "Checking prior notes and common launch gaps.",
-        result: "Collected messaging, channels, and readiness criteria.",
-        durationMs: 1100,
-      },
-      {
-        title: "Build checklist",
-        kind: "draft",
-        detail: "Turning inputs into an actionable checklist.",
-        result: "Drafted a launch checklist with owners and gates.",
-        durationMs: 1500,
-      },
-      {
-        title: "Pin checklist to memory",
-        kind: "memory",
-        detail: "Save launch project preference for later sessions.",
-        requiresApproval: true,
-        result: "Launch checklist pinned for future sessions.",
-        durationMs: 700,
-      },
-    ],
-    artifact: `# Launch Checklist
-
-- [ ] Positioning one-liner locked
-- [ ] Landing page hero + CTA reviewed
-- [ ] Changelog drafted
-- [ ] Support macros ready
-- [ ] Analytics events verified
-- [ ] Soft launch to 10 friendly users
-- [ ] Public announce pack (email, Slack, X)
-- [ ] Day-1 triage owner assigned`,
-    reply:
-      "I'll assemble a launch checklist from your notes and pin it once you approve.",
   },
 ];
 
@@ -216,7 +265,7 @@ function genericPlan(goal: string): PlanSeed {
         browse: {
           title: "Research Scratchpad",
           url: "https://research.dot/scratch",
-          content: `Working notes for: ${goal}\n\n- Identified stakeholders and constraints\n- Listed unknowns to resolve\n- Drafting a first pass deliverable`,
+          content: `Working notes for: ${goal}`,
         },
         result: "Collected context and open questions.",
         durationMs: 1400,
@@ -237,25 +286,9 @@ function genericPlan(goal: string): PlanSeed {
         durationMs: 800,
       },
     ],
-    artifact: `# Progress Report
-
-## Goal
-${goal}
-
-## What I did
-- Clarified the ask into sequential steps
-- Researched context on the cloud computer
-- Drafted a first deliverable for your review
-
-## Needs your judgment
-Approve saving this progress so I can continue from here in later sessions.
-
-## Suggested next moves
-1. Confirm the desired outcome and audience
-2. Point me at any source docs or constraints
-3. Tell me what “done” looks like`,
-    reply:
-      "Got it. I'll break this into steps, work through them on my cloud computer, and check with you before saving anything lasting.",
+    artifact: `# Progress Report\n\n## Goal\n${goal}\n\nFirst deliverable ready for your review.`,
+    reply: (name) =>
+      `Got it. ${name} will work this on the cloud computer and check with you before saving anything lasting.`,
   };
 }
 
@@ -265,6 +298,22 @@ function pickPlan(goal: string): PlanSeed {
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function stepNeedsApproval(step: TaskStep, state: WorkspaceState): boolean {
+  if (!step.requiresApproval) return false;
+  if (step.kind === "pr") {
+    const rule = state.rules.find((r) => r.id === "rule-pr");
+    if (rule?.mode === "allow") return false;
+    if (rule?.mode === "block") return true;
+  }
+  if (step.kind === "write") {
+    const rule = state.rules.find((r) => r.id === "rule-send");
+    if (rule?.mode === "allow" && /email|send|message/i.test(step.title)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 async function setComputerWorking(
@@ -295,10 +344,7 @@ async function setComputerWorking(
   });
 }
 
-async function createApproval(
-  task: Task,
-  step: TaskStep,
-): Promise<Approval> {
+async function createApproval(task: Task, step: TaskStep): Promise<Approval> {
   const approval: Approval = {
     id: randomUUID(),
     taskId: task.id,
@@ -329,32 +375,66 @@ async function createApproval(
   return approval;
 }
 
-async function finishTask(taskId: string, artifact: string) {
-  await updateState((state) => {
-    const task = state.tasks.find((t) => t.id === taskId);
+async function finishTask(
+  taskId: string,
+  artifact: string,
+  pullRequests?: PlanSeed["pullRequests"],
+) {
+  const state = await readState();
+  const name = state.agentName;
+
+  await updateState((s) => {
+    const task = s.tasks.find((t) => t.id === taskId);
     if (!task) return;
     task.status = "completed";
     task.artifact = artifact;
+    if (pullRequests?.length) {
+      task.pullRequests = pullRequests.map((pr) => ({
+        ...pr,
+        id: randomUUID(),
+        taskId,
+        createdAt: new Date().toISOString(),
+      }));
+    }
     task.updatedAt = new Date().toISOString();
-    state.agentStatus = state.tasks.some(
+    s.agentStatus = s.tasks.some(
       (t) => t.status === "running" || t.status === "waiting_approval",
     )
-      ? state.agentStatus
+      ? s.agentStatus
       : "idle";
-    state.computer.status = "idle";
-    state.computer.currentAction = "Standing by for the next goal.";
-    state.computer.logs.unshift("Task completed.");
+    s.computer.status = "idle";
+    s.computer.currentAction = "Standing by for the next goal.";
+    s.computer.logs.unshift("Task completed.");
+
+    const standing = s.standingGoals.find((g) => /deprecated|inventory/i.test(g.title));
+    if (standing && pullRequests?.length) {
+      standing.status = "watching";
+    }
   });
+
+  if (pullRequests?.length) {
+    await addActivity(
+      "pr",
+      `Opened ${pullRequests.length} pull requests for review.`,
+      taskId,
+    );
+  }
   await addActivity("work", "Finished the current goal.", taskId);
   await addMessage(
     "assistant",
-    "Done — the deliverable is ready in the task panel. I kept the useful bits in memory so we can continue later without restarting.",
+    pullRequests?.length
+      ? `Done — ${pullRequests.length} PRs are ready in the Tasks panel. ${name} kept the dependency map in memory so we can watch the shutdown window next.`
+      : `Done — the deliverable is ready in the task panel. ${name} kept the useful bits in memory so we can continue later.`,
     taskId,
   );
   await setAgentStatus((await readState()).agentStatus);
 }
 
-async function runTaskLoop(taskId: string, artifact: string) {
+async function runTaskLoop(
+  taskId: string,
+  artifact: string,
+  pullRequests?: PlanSeed["pullRequests"],
+) {
   if (runningTasks.has(taskId)) return;
   runningTasks.add(taskId);
 
@@ -383,7 +463,7 @@ async function runTaskLoop(taskId: string, artifact: string) {
 
       const step = task.steps[task.currentStepIndex];
       if (!step) {
-        await finishTask(taskId, artifact);
+        await finishTask(taskId, artifact, pullRequests);
         break;
       }
 
@@ -395,13 +475,18 @@ async function runTaskLoop(taskId: string, artifact: string) {
         const st = t.steps[t.currentStepIndex];
         if (st) st.status = "running";
         s.agentStatus = "working";
+        const standing = s.standingGoals.find((g) =>
+          /deprecated|inventory/i.test(g.title),
+        );
+        if (standing && /inventory|api|pr/i.test(t.goal)) {
+          standing.status = "acting";
+        }
       });
 
       await addActivity("work", step.title, taskId);
       await setComputerWorking(step.detail ?? step.title, step.browse);
       await sleep(Math.max(600, step.durationMs ?? 1200));
 
-      // Re-check takeover mid-step
       const mid = await readState();
       if (mid.computer.mode === "user") {
         await updateState((s) => {
@@ -415,11 +500,29 @@ async function runTaskLoop(taskId: string, artifact: string) {
         continue;
       }
 
-      if (step.requiresApproval) {
-        const live = await readState();
-        const liveTask = live.tasks.find((t) => t.id === taskId);
+      if (stepNeedsApproval(step, mid)) {
+        const liveTask = mid.tasks.find((t) => t.id === taskId);
         const liveStep = liveTask?.steps[liveTask.currentStepIndex];
         if (liveTask && liveStep) {
+          const rule = mid.rules.find((r) => r.id === "rule-pr");
+          if (liveStep.kind === "pr" && rule?.mode === "block") {
+            await updateState((s) => {
+              const t = s.tasks.find((x) => x.id === taskId);
+              if (!t) return;
+              const st = t.steps[t.currentStepIndex];
+              if (st) st.status = "skipped";
+              t.status = "cancelled";
+              t.error = "Blocked by custom rule: Open pull requests";
+              s.agentStatus = "idle";
+              s.computer.status = "idle";
+            });
+            await addMessage(
+              "assistant",
+              "Stopped — your custom rules block opening pull requests. Flip that rule to Ask or Allow if you want me to continue.",
+              taskId,
+            );
+            break;
+          }
           await createApproval(liveTask, liveStep);
         }
         continue;
@@ -456,6 +559,7 @@ async function runTaskLoop(taskId: string, artifact: string) {
 }
 
 export async function startGoal(goal: string): Promise<WorkspaceState> {
+  const state = await readState();
   const plan = pickPlan(goal);
   const now = new Date().toISOString();
 
@@ -482,13 +586,13 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     plannedArtifact: plan.artifact,
   };
 
-  await updateState((state) => {
-    state.tasks.unshift(task);
-    state.agentStatus = "thinking";
+  await updateState((s) => {
+    s.tasks.unshift(task);
+    s.agentStatus = "thinking";
   });
 
   await addMessage("user", goal, task.id);
-  await addMessage("assistant", plan.reply, task.id);
+  await addMessage("assistant", plan.reply(state.agentName), task.id);
   await addActivity("work", `Started: ${plan.goalLabel}`, task.id);
 
   if (plan.memory) {
@@ -496,9 +600,7 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     await addActivity("memory", `Remembered: ${plan.memory.text}`, task.id);
   }
 
-  // Fire and forget background work
-  void runTaskLoop(task.id, plan.artifact);
-
+  void runTaskLoop(task.id, plan.artifact, plan.pullRequests);
   return readState();
 }
 
@@ -506,14 +608,12 @@ export async function resumeTask(taskId: string) {
   const state = await readState();
   const task = state.tasks.find((t) => t.id === taskId);
   if (!task || task.status === "completed") return;
+  const plan = pickPlan(task.goal);
   const artifact =
     task.plannedArtifact ??
     task.artifact ??
-    `# Progress\n\nGoal: ${task.goal}\n\nCompleted steps:\n${task.steps
-      .filter((s) => s.status === "done")
-      .map((s) => `- ${s.title}`)
-      .join("\n")}`;
-  void runTaskLoop(taskId, artifact);
+    `# Progress\n\nGoal: ${task.goal}`;
+  void runTaskLoop(taskId, artifact, plan.pullRequests);
 }
 
 export async function resolveApproval(
@@ -576,6 +676,7 @@ export async function resolveApproval(
 export async function setComputerMode(
   mode: "agent" | "user",
 ): Promise<WorkspaceState> {
+  const name = (await readState()).agentName;
   await updateState((state) => {
     state.computer.mode = mode;
     if (mode === "user") {
@@ -590,7 +691,7 @@ export async function setComputerMode(
         }
       }
     } else {
-      state.computer.logs.unshift("Control returned to Dot.");
+      state.computer.logs.unshift(`Control returned to ${name}.`);
       state.computer.currentAction = "Resuming work.";
       for (const task of state.tasks) {
         if (task.status === "paused") {
@@ -610,7 +711,9 @@ export async function setComputerMode(
 
   await addActivity(
     "handoff",
-    mode === "user" ? "You took over the computer." : "Returned control to Dot.",
+    mode === "user"
+      ? "You took over the computer."
+      : `Returned control to ${name}.`,
   );
 
   if (mode === "agent") {
@@ -632,4 +735,24 @@ export async function addMemoryNote(
   const note = await upsertMemory(kind, text);
   await addActivity("memory", `Saved ${kind}: ${text}`);
   return note;
+}
+
+export async function updateRule(
+  ruleId: string,
+  mode: "allow" | "ask" | "block",
+) {
+  await updateState((state) => {
+    const rule = state.rules.find((r) => r.id === ruleId);
+    if (rule) rule.mode = mode;
+  });
+  await addActivity("info", `Updated rule: ${ruleId} → ${mode}`);
+  return readState();
+}
+
+export async function toggleApp(appId: string) {
+  await updateState((state) => {
+    const app = state.apps.find((a) => a.id === appId);
+    if (app) app.connected = !app.connected;
+  });
+  return readState();
 }

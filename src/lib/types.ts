@@ -17,7 +17,16 @@ export type TaskStatus =
   | "failed"
   | "cancelled";
 
-export type StepKind = "research" | "analyze" | "draft" | "write" | "browse" | "memory";
+export type StepKind =
+  | "research"
+  | "analyze"
+  | "draft"
+  | "write"
+  | "browse"
+  | "memory"
+  | "code"
+  | "test"
+  | "pr";
 
 export type TaskStep = {
   id: string;
@@ -31,6 +40,19 @@ export type TaskStep = {
   browse?: { title: string; url: string; content: string };
 };
 
+export type PullRequest = {
+  id: string;
+  number: number;
+  title: string;
+  repo: string;
+  branch: string;
+  summary: string;
+  filesChanged: number;
+  status: "draft" | "ready" | "merged";
+  taskId: string;
+  createdAt: string;
+};
+
 export type Task = {
   id: string;
   goal: string;
@@ -41,6 +63,7 @@ export type Task = {
   updatedAt: string;
   plannedArtifact?: string;
   artifact?: string;
+  pullRequests?: PullRequest[];
   error?: string;
 };
 
@@ -63,6 +86,29 @@ export type MemoryNote = {
   updatedAt: string;
 };
 
+export type RuleMode = "allow" | "ask" | "block";
+
+export type CustomRule = {
+  id: string;
+  label: string;
+  description: string;
+  mode: RuleMode;
+};
+
+export type ConnectedApp = {
+  id: string;
+  name: string;
+  connected: boolean;
+  detail: string;
+};
+
+export type StandingGoal = {
+  id: string;
+  title: string;
+  cadence: string;
+  status: "watching" | "acting" | "paused";
+};
+
 export type ComputerMode = "agent" | "user";
 
 export type BrowserTab = {
@@ -83,19 +129,26 @@ export type ComputerState = {
 
 export type ActivityEvent = {
   id: string;
-  type: "info" | "work" | "approval" | "memory" | "handoff" | "error";
+  type: "info" | "work" | "approval" | "memory" | "handoff" | "error" | "pr";
   text: string;
   createdAt: string;
   taskId?: string;
 };
 
+export type AvatarTone = "teal" | "coral" | "indigo" | "amber";
+
 export type WorkspaceState = {
+  onboarded: boolean;
+  agentName: string;
+  avatarTone: AvatarTone;
   messages: Message[];
   tasks: Task[];
   approvals: Approval[];
   memory: MemoryNote[];
+  rules: CustomRule[];
+  apps: ConnectedApp[];
+  standingGoals: StandingGoal[];
   computer: ComputerState;
   activity: ActivityEvent[];
-  agentName: string;
   agentStatus: "idle" | "thinking" | "working" | "waiting" | "paused";
 };
