@@ -81,7 +81,7 @@ export function OpenDotsNav({
     state.pages.filter((p) => p.spaceId === spaceId).length;
 
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col border-r border-neutral-800/60 bg-black/55 backdrop-blur-md">
+    <aside className="flex h-full min-h-0 w-full flex-col border-r border-neutral-800/50 bg-black/40 backdrop-blur-xl">
       <div className="flex items-center gap-2 border-b border-neutral-800/60 px-3 py-3">
         <div className="grid h-7 w-7 grid-cols-3 gap-0.5 p-1">
           {Array.from({ length: 9 }).map((_, i) => (

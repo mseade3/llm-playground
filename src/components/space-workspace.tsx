@@ -25,13 +25,13 @@ export function SpaceWorkspace({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-zinc-950/30">
-      <header className="border-b border-zinc-800/80 px-5 py-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+    <section className="flex h-full min-h-0 flex-col bg-transparent">
+      <header className="border-b border-neutral-800/50 px-5 py-4">
+        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-neutral-500">
           Space
         </p>
-        <h2 className="font-heading text-2xl text-zinc-50">{space.name}</h2>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h2 className="font-heading text-2xl text-white">{space.name}</h2>
+        <p className="mt-1 text-sm text-neutral-500">
           {space.id === "space-portfolio"
             ? "AADE depth, metrics, and systems notes."
             : space.id === "space-research"

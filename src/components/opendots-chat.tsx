@@ -206,7 +206,7 @@ export function OpenDotsChat({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-black/25">
+    <section className="flex h-full min-h-0 flex-col bg-transparent">
       <header className="flex items-center justify-between gap-3 border-b border-zinc-800/80 px-4 py-3 md:px-5">
         <div className="flex min-w-0 items-center gap-3">
           {dot && (
