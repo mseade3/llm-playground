@@ -41,6 +41,128 @@ type PlanSeed = {
 
 const PLANS: PlanSeed[] = [
   {
+    match: /canvas|assignment|homework|due date|what's due|what is due|school/i,
+    goalLabel: "Canvas due-date sweep",
+    threadLabel: "Canvas · courses",
+    workerModel: "Astra",
+    memory: {
+      kind: "project",
+      text: "Watching Canvas assignments and drafting study plans.",
+    },
+    steps: [
+      {
+        title: "Sync Canvas assignments",
+        kind: "research",
+        detail: "Pulling upcoming work from the Canvas plugin.",
+        browse: {
+          title: "Canvas · Upcoming",
+          url: "https://canvas.example.edu/calendar",
+          content:
+            "Plugin: Canvas (mock unless CANVAS_* env set)\nSyncing users/self/upcoming_events…\n2 items due within 48h · 1 milestone this week.",
+        },
+        result: "Synced Canvas upcoming assignments.",
+        durationMs: 1200,
+      },
+      {
+        title: "Prioritize next 48 hours",
+        kind: "analyze",
+        detail: "Ranking by due date and points.",
+        result: "Lab 4 and HCI reading response need attention first.",
+        durationMs: 1100,
+      },
+      {
+        title: "Draft study plan",
+        kind: "draft",
+        detail: "Building a behind-the-scenes plan Dot can keep watching.",
+        result: "Study plan drafted with time blocks.",
+        durationMs: 1400,
+      },
+      {
+        title: "Pin Canvas plan",
+        kind: "write",
+        detail: "Save the plan and enable the 48h standing goal.",
+        requiresApproval: true,
+        result: "Canvas plan pinned; standing goal watching.",
+        durationMs: 700,
+      },
+    ],
+    artifact: `# Canvas — next 48 hours
+
+## Due soon
+1. **Lab 4 — Dependency graphs** (CS 320) · ~36h
+2. **Reading response: Always-on agents** (HCI 210) · ~36h
+
+## Later this week
+3. **Milestone 2 — Product brief** (ENT 401)
+
+## Behind-the-scenes plan
+- Tonight: outline Lab 4 (45m)
+- Tonight: draft reading response (25m)
+- Dot keeps the Canvas standing goal on watch and pings if still open`,
+    reply: (name) =>
+      `${name} will sync Canvas, prioritize what's due in 48 hours, and draft a study plan — then ask before pinning it to standing goals.`,
+  },
+  {
+    match: /github issues|triage|open issues|repo issues|behind the scenes.*git/i,
+    goalLabel: "GitHub issue triage",
+    threadLabel: "GitHub · issues",
+    workerModel: "Astra",
+    memory: {
+      kind: "project",
+      text: "Triage GitHub issues and propose behind-the-scenes fixes.",
+    },
+    steps: [
+      {
+        title: "Sync open issues",
+        kind: "research",
+        detail: "Reading issues via the GitHub plugin.",
+        browse: {
+          title: "GitHub · Issues",
+          url: "https://github.com/acme/commerce/issues",
+          content:
+            "Plugin: GitHub (mock unless GITHUB_TOKEN set)\nOpen: #214 P1 inventory callers · #219 webhook retries · #221 partner docs",
+        },
+        result: "Synced open issues from the default repo.",
+        durationMs: 1200,
+      },
+      {
+        title: "Rank by impact",
+        kind: "analyze",
+        detail: "P1 bugs first, then docs that unblock partners.",
+        result: "P1 inventory callers should be first behind-the-scenes job.",
+        durationMs: 1000,
+      },
+      {
+        title: "Propose fix threads",
+        kind: "draft",
+        detail: "Queue draft work Dot can run after you approve.",
+        result: "Proposed 2 fix threads + 1 docs PR.",
+        durationMs: 1400,
+      },
+      {
+        title: "Enable GitHub standing goals",
+        kind: "write",
+        detail: "Keep issue triage watching after this run.",
+        requiresApproval: true,
+        result: "GitHub standing goals enabled.",
+        durationMs: 700,
+      },
+    ],
+    artifact: `# GitHub triage
+
+## Open issues
+1. **#214** Inventory v1 callers still hitting /v1 in admin · P1
+2. **#219** Webhook retry for stock sync · enhancement
+3. **#221** Partner migration docs · docs
+
+## Behind-the-scenes queue
+1. Spin a worker thread for #214
+2. Draft docs PR for #221
+3. Ask before opening any PR (rule: ask)`,
+    reply: (name) =>
+      `${name} will sync GitHub issues, rank them, and propose behind-the-scenes fix threads — approval before enabling ongoing triage.`,
+  },
+  {
     match: /muse|grokbot|grok bot|comparison site|use cases|dots vs/i,
     goalLabel: "Build Dots comparison website",
     threadLabel: "Codex thread · dots project",
@@ -854,6 +976,22 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     await addActivity("memory", `Remembered: ${plan.memory.text}`, task.id);
   }
 
+  // Kick plugin sync for life-surface goals (mock or live)
+  if (/canvas/i.test(plan.goalLabel)) {
+    const canvas = state.plugins.find((p) => p.id === "canvas");
+    if (canvas && !canvas.connected) {
+      await setPluginConnected("canvas", true);
+    }
+    void syncPlugin("canvas", "list_assignments").catch(() => undefined);
+  }
+  if (/github/i.test(plan.goalLabel)) {
+    const gh = state.plugins.find((p) => p.id === "github");
+    if (gh && !gh.connected) {
+      await setPluginConnected("github", true);
+    }
+    void syncPlugin("github", "list_issues").catch(() => undefined);
+  }
+
   void runTaskLoop(task.id, plan.artifact, plan.pullRequests);
   return readState();
 }
@@ -1004,15 +1142,89 @@ export async function updateRule(
 }
 
 export async function toggleApp(appId: string) {
+  return setPluginConnected(appId, undefined);
+}
+
+export async function setPluginConnected(
+  pluginId: string,
+  connected?: boolean,
+) {
+  const { getPluginDef, liveModeAvailable } = await import("./plugins/registry");
+  const { defaultPluginStandingGoals } = await import("./plugins/state");
+  let becameConnected = false;
   await updateState((state) => {
-    const app = state.apps.find((a) => a.id === appId);
-    if (app) app.connected = !app.connected;
-    if (appId === "gmail") {
-      const standing = state.standingGoals.find((g) => g.id === "sg-inbox");
-      if (standing) {
-        standing.status = app?.connected ? "watching" : "paused";
+    const plugin = state.plugins.find((p) => p.id === pluginId);
+    if (!plugin) return;
+    const def = getPluginDef(pluginId);
+    const next =
+      typeof connected === "boolean" ? connected : !plugin.connected;
+    // Unimplemented plugins can be "interested" as mock stubs only when forcing connect=false
+    if (next && def && !def.implemented) {
+      return;
+    }
+    plugin.connected = next;
+    becameConnected = next;
+    plugin.connectedAt = next ? new Date().toISOString() : null;
+    plugin.mode =
+      def && liveModeAvailable(def) && next ? "live" : "mock";
+    for (const goal of state.standingGoals) {
+      if (goal.pluginId === pluginId) {
+        goal.enabled = next;
+        goal.status = next ? "watching" : "paused";
       }
     }
+    const catalogGoals = defaultPluginStandingGoals(state.plugins);
+    for (const g of catalogGoals) {
+      if (!state.standingGoals.some((x) => x.id === g.id)) {
+        state.standingGoals.push(g);
+      }
+    }
+  });
+  const def = getPluginDef(pluginId);
+  await addActivity(
+    "info",
+    `${def?.name ?? pluginId} ${becameConnected ? "connected" : "disconnected"}.`,
+  );
+  return readState();
+}
+
+export async function syncPlugin(pluginId: string, action = "sync") {
+  const { runPluginAction } = await import("./plugins/handlers");
+  const state = await readState();
+  const plugin = state.plugins.find((p) => p.id === pluginId);
+  if (!plugin) {
+    throw new Error("Plugin not found");
+  }
+  const result = await runPluginAction(plugin, action);
+  await updateState((s) => {
+    const p = s.plugins.find((x) => x.id === pluginId);
+    if (p) {
+      p.lastSyncAt = new Date().toISOString();
+      p.lastSyncSummary = result.summary;
+      p.mode = result.mode;
+    }
+    for (const goal of s.standingGoals) {
+      if (goal.pluginId === pluginId && goal.enabled) {
+        goal.status = "acting";
+      }
+    }
+  });
+  await addActivity(
+    result.ok ? "work" : "error",
+    result.summary,
+  );
+  return { state: await readState(), result };
+}
+
+export async function setStandingGoalEnabled(
+  goalId: string,
+  enabled: boolean,
+) {
+  await updateState((state) => {
+    const goal = state.standingGoals.find((g) => g.id === goalId);
+    if (!goal) return;
+    goal.enabled = enabled;
+    goal.status = enabled ? "watching" : "paused";
   });
   return readState();
 }
@@ -1095,7 +1307,7 @@ async function maybeSendProactive() {
     const state = await readState();
     if (!state.onboarded) return;
     if (state.proactivity === "quiet") return;
-    const gmail = state.apps.find((a) => a.id === "gmail");
+    const gmail = state.plugins.find((a) => a.id === "gmail");
     if (!gmail?.connected) return;
 
     const minGapMs = state.proactivity === "high" ? 12000 : 28000;

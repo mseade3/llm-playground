@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     avatarTone?: AvatarTone;
     connectGmail?: boolean;
     connectYoutube?: boolean;
+    connectCanvas?: boolean;
+    connectGithub?: boolean;
   };
   const tone = TONES.includes(body.avatarTone as AvatarTone)
     ? (body.avatarTone as AvatarTone)
@@ -20,6 +22,8 @@ export async function POST(request: Request) {
   const state = await createDot(body.name?.trim() || "Winston", tone, {
     connectGmail: body.connectGmail,
     connectYoutube: body.connectYoutube,
+    connectCanvas: body.connectCanvas,
+    connectGithub: body.connectGithub,
   });
   ensureProactiveLoop();
   return NextResponse.json(state);

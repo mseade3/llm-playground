@@ -37,7 +37,9 @@ export function Workspace() {
     resolveAuth,
     addMemory,
     updateRule,
-    toggleApp,
+    togglePlugin,
+    syncPlugin,
+    toggleGoal,
     setProactivity,
     selectTask,
     reset,
@@ -179,24 +181,25 @@ export function Workspace() {
 
                 <div>
                   <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
-                    Connected apps
+                    Connected plugins
+                  </p>
+                  <p className="mb-2 text-xs text-zinc-500">
+                    Manage the full catalog in the Plugins tab — including
+                    Canvas, GitHub, and money surfaces.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {state.apps.map((app) => (
-                      <button
-                        key={app.id}
-                        type="button"
-                        onClick={() => void toggleApp(app.id)}
-                        className={cn(
-                          "rounded-full px-2.5 py-1 text-[11px] ring-1",
-                          app.connected
-                            ? "bg-teal-500/15 text-teal-200 ring-teal-500/30"
-                            : "bg-zinc-900 text-zinc-500 ring-zinc-700",
-                        )}
-                      >
-                        {app.name}
-                      </button>
-                    ))}
+                    {state.plugins
+                      .filter((p) => p.connected)
+                      .map((plugin) => (
+                        <button
+                          key={plugin.id}
+                          type="button"
+                          onClick={() => void togglePlugin(plugin.id)}
+                          className="rounded-full bg-teal-500/15 px-2.5 py-1 text-[11px] text-teal-200 ring-1 ring-teal-500/30"
+                        >
+                          {plugin.id}
+                        </button>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -231,7 +234,9 @@ export function Workspace() {
             onComputerMode={setComputerMode}
             onAddMemory={addMemory}
             onUpdateRule={updateRule}
-            onToggleApp={toggleApp}
+            onTogglePlugin={togglePlugin}
+            onSyncPlugin={syncPlugin}
+            onToggleGoal={toggleGoal}
             onSelectTask={selectTask}
             onResolveAuth={resolveAuth}
           />
@@ -246,7 +251,9 @@ export function Workspace() {
           onComputerMode={setComputerMode}
           onAddMemory={addMemory}
           onUpdateRule={updateRule}
-          onToggleApp={toggleApp}
+          onTogglePlugin={togglePlugin}
+          onSyncPlugin={syncPlugin}
+          onToggleGoal={toggleGoal}
           onSelectTask={selectTask}
           onResolveAuth={resolveAuth}
         />

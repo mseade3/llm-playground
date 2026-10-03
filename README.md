@@ -1,37 +1,42 @@
 # Dot — always-on agent workspace
 
-A dark-themed, Dots-inspired demo: name your agent, orchestrate Codex-style threads, handle login takeovers, get proactive inbox pings, and approve PRs — patterns from OpenAI DevDay + early-access walkthroughs.
+Dark-themed Dots-inspired agent with a **plugin registry** for life surfaces (Canvas, GitHub, Gmail, money stubs, and more). Connect plugins, enable standing goals, sync mock or live APIs, and let Dot work behind the scenes.
 
-## What’s in the demo
+## Plugin registry
 
-- **Dark charcoal + teal** UI
-- **Create your Dot** — name, avatar, plugin connect (Gmail / YouTube)
-- **Orchestration threads** — click worker threads Dot spins up
-- **Proactivity** — quiet / balanced / high (Profile or “be quieter”)
-- **Auth takeover** — YouTube Studio login + 2FA handoff
-- **DevDay coding flow** — retire inventory API → open PRs
-- **Comparison site flow** — Dots vs Muse vs Grokbot via a Soul worker
-- **Custom rules**, connected apps, standing goals, cloud computer
+| Plugin | Category | Status | Live env |
+| --- | --- | --- | --- |
+| Canvas | School | Implemented (mock/live) | `CANVAS_BASE_URL`, `CANVAS_API_TOKEN` |
+| GitHub | Build | Implemented (mock/live) | `GITHUB_TOKEN` (+ optional `GITHUB_OWNER`, `GITHUB_REPO`) |
+| Gmail / Slack / YouTube / Notion | Comms/Content/Ops | Implemented (mock) | — |
+| Stripe / Upwork / Calendar | Money/Ops | Catalog stubs | see `.env.example` |
 
-No API keys required.
+**How to add another life surface**
+1. Add a row to `src/lib/plugins/registry.ts`
+2. Add a handler in `src/lib/plugins/handlers/`
+3. Register it in `handlers/index.ts`
+4. (Optional) add an agent plan in `src/lib/agent.ts`
+
+Standing goals ship with each plugin and toggle on connect.
 
 ## Run locally
 
 ```bash
 npm install
+cp .env.example .env.local   # optional live tokens
 npm run dev
 ```
 
 Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
-## Try these prompts
+## Try
 
-1. **Build a Dots vs Muse vs Grokbot comparison site.**
-2. **Analyze my last 10 YouTube videos in Studio.** (finish auth when prompted)
-3. **Remove the old inventory API before it gets shut down.**
-4. **Be quieter** / **be more proactive**
+1. Create Winston with Canvas + GitHub checked
+2. Open the **Plug** tab → Sync Canvas / GitHub
+3. Chat: **Check Canvas for what's due** or **Triage my GitHub issues**
+4. Enable standing goals per plugin for behind-the-scenes watching
 
 ## Notes
 
-- State lives in `.data/workspace.json` (gitignored).
-- **Reset** returns to Create your Dot.
+- Without tokens, plugins run in **mock** mode so the demo always works.
+- State: `.data/workspace.json` (gitignored). **Reset** clears to Create your Dot.

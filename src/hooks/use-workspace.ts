@@ -52,6 +52,8 @@ export function useWorkspace() {
       tone: AvatarTone;
       connectGmail: boolean;
       connectYoutube: boolean;
+      connectCanvas: boolean;
+      connectGithub: boolean;
     }) => {
       const res = await fetch("/api/onboard", {
         method: "POST",
@@ -61,6 +63,8 @@ export function useWorkspace() {
           avatarTone: payload.tone,
           connectGmail: payload.connectGmail,
           connectYoutube: payload.connectYoutube,
+          connectCanvas: payload.connectCanvas,
+          connectGithub: payload.connectGithub,
         }),
       });
       if (!res.ok) throw new Error("Failed to create Dot");
@@ -139,13 +143,35 @@ export function useWorkspace() {
     setState(await res.json());
   }, []);
 
-  const toggleApp = useCallback(async (appId: string) => {
-    const res = await fetch("/api/apps", {
+  const togglePlugin = useCallback(async (pluginId: string) => {
+    const res = await fetch("/api/plugins", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appId }),
+      body: JSON.stringify({ action: "toggle", pluginId }),
     });
-    if (!res.ok) throw new Error("Failed to toggle app");
+    if (!res.ok) throw new Error("Failed to toggle plugin");
+    setState(await res.json());
+  }, []);
+
+  const syncPlugin = useCallback(async (pluginId: string) => {
+    const res = await fetch("/api/plugins", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "sync", pluginId }),
+    });
+    if (!res.ok) throw new Error("Failed to sync plugin");
+    const data = await res.json();
+    setState(data);
+    return data;
+  }, []);
+
+  const toggleGoal = useCallback(async (goalId: string, enabled: boolean) => {
+    const res = await fetch("/api/plugins", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "goal", goalId, enabled }),
+    });
+    if (!res.ok) throw new Error("Failed to update standing goal");
     setState(await res.json());
   }, []);
 
@@ -187,7 +213,9 @@ export function useWorkspace() {
     resolveAuth,
     addMemory,
     updateRule,
-    toggleApp,
+    togglePlugin,
+    syncPlugin,
+    toggleGoal,
     setProactivity,
     selectTask,
     reset,

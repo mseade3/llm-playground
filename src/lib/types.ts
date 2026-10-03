@@ -1,3 +1,8 @@
+import type { PluginConnection as PluginConnectionModel } from "./plugins/types";
+
+export type PluginConnection = PluginConnectionModel;
+export type { PluginMode } from "./plugins/types";
+
 export type MessageRole = "user" | "assistant" | "system";
 
 export type Message = {
@@ -101,6 +106,7 @@ export type CustomRule = {
   mode: RuleMode;
 };
 
+/** @deprecated Use PluginConnection — kept for migrate compatibility */
 export type ConnectedApp = {
   id: string;
   name: string;
@@ -113,6 +119,8 @@ export type StandingGoal = {
   title: string;
   cadence: string;
   status: "watching" | "acting" | "paused";
+  pluginId?: string;
+  enabled?: boolean;
 };
 
 export type ComputerMode = "agent" | "user";
@@ -175,7 +183,9 @@ export type WorkspaceState = {
   approvals: Approval[];
   memory: MemoryNote[];
   rules: CustomRule[];
-  apps: ConnectedApp[];
+  plugins: PluginConnection[];
+  /** @deprecated migrated into plugins */
+  apps?: ConnectedApp[];
   standingGoals: StandingGoal[];
   computer: ComputerState;
   activity: ActivityEvent[];

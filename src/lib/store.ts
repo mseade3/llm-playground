@@ -11,6 +11,12 @@ import type {
   Task,
   WorkspaceState,
 } from "./types";
+import {
+  defaultPluginConnections,
+  defaultPluginStandingGoals,
+  mergePluginConnections,
+} from "./plugins/state";
+import { getPluginDef } from "./plugins/registry";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const STATE_FILE = path.join(DATA_DIR, "workspace.json");
@@ -69,60 +75,9 @@ function defaultRules() {
   ];
 }
 
-function defaultApps() {
-  return [
-    {
-      id: "github",
-      name: "GitHub",
-      connected: true,
-      detail: "Repos + PRs",
-    },
-    {
-      id: "slack",
-      name: "Slack",
-      connected: true,
-      detail: "Notify on decisions",
-    },
-    {
-      id: "gmail",
-      name: "Gmail",
-      connected: true,
-      detail: "Proactive inbox watch",
-    },
-    {
-      id: "youtube",
-      name: "YouTube",
-      connected: false,
-      detail: "Studio analytics (needs login)",
-    },
-    {
-      id: "notion",
-      name: "Notion",
-      connected: false,
-      detail: "Docs & briefs",
-    },
-  ];
-}
-
-function defaultStandingGoals() {
-  return [
-    {
-      id: "sg-deps",
-      title: "Watch for deprecated APIs in inventory services",
-      cadence: "Continuous",
-      status: "watching" as const,
-    },
-    {
-      id: "sg-inbox",
-      title: "Surface urgent customer emails before standup",
-      cadence: "Weekdays 8:30am",
-      status: "paused" as const,
-    },
-  ];
-}
-
 export function defaultState(): WorkspaceState {
   const now = new Date().toISOString();
+  const plugins = defaultPluginConnections();
   return {
     onboarded: false,
     agentName: "Winston",
@@ -159,8 +114,8 @@ export function defaultState(): WorkspaceState {
       },
     ],
     rules: defaultRules(),
-    apps: defaultApps(),
-    standingGoals: defaultStandingGoals(),
+    plugins,
+    standingGoals: defaultPluginStandingGoals(plugins),
     computer: defaultComputer("Winston"),
     activity: [
       {
@@ -176,8 +131,10 @@ export function defaultState(): WorkspaceState {
 function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): WorkspaceState {
   const base = defaultState();
   const name = raw.agentName || base.agentName;
-  const apps =
-    raw.apps?.some((a) => a.id === "youtube") ? raw.apps : base.apps;
+  const plugins = mergePluginConnections(raw.plugins, raw.apps);
+  const standingGoals = raw.standingGoals?.length
+    ? mergeStandingGoals(raw.standingGoals, plugins)
+    : defaultPluginStandingGoals(plugins);
   return {
     ...base,
     ...raw,
@@ -189,10 +146,8 @@ function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): Workspa
     selectedTaskId: raw.selectedTaskId ?? null,
     lastProactiveAt: raw.lastProactiveAt ?? null,
     rules: raw.rules?.length ? raw.rules : base.rules,
-    apps,
-    standingGoals: raw.standingGoals?.length
-      ? raw.standingGoals
-      : base.standingGoals,
+    plugins,
+    standingGoals,
     computer: {
       ...defaultComputer(name),
       ...(raw.computer ?? {}),
@@ -205,6 +160,24 @@ function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): Workspa
     activity: raw.activity?.length ? raw.activity : base.activity,
     agentStatus: raw.agentStatus ?? "idle",
   };
+}
+
+function mergeStandingGoals(
+  existing: WorkspaceState["standingGoals"],
+  plugins: WorkspaceState["plugins"],
+): WorkspaceState["standingGoals"] {
+  const catalog = defaultPluginStandingGoals(plugins);
+  const byId = new Map(existing.map((g) => [g.id, g]));
+  return catalog.map((g) => {
+    const prev = byId.get(g.id);
+    if (!prev) return g;
+    return {
+      ...g,
+      ...prev,
+      pluginId: g.pluginId,
+      enabled: prev.enabled ?? g.enabled,
+    };
+  });
 }
 
 let cache: WorkspaceState | null = null;
@@ -332,7 +305,12 @@ export async function getApproval(
 export async function createDot(
   name: string,
   avatarTone: AvatarTone,
-  options?: { connectGmail?: boolean; connectYoutube?: boolean },
+  options?: {
+    connectGmail?: boolean;
+    connectYoutube?: boolean;
+    connectCanvas?: boolean;
+    connectGithub?: boolean;
+  },
 ): Promise<WorkspaceState> {
   const trimmed = name.trim().slice(0, 24) || "Winston";
   const now = new Date().toISOString();
@@ -341,25 +319,31 @@ export async function createDot(
   state.agentName = trimmed;
   state.avatarTone = avatarTone;
   state.computer = defaultComputer(trimmed);
-  state.apps = state.apps.map((app) => {
-    if (app.id === "gmail") {
-      return { ...app, connected: options?.connectGmail ?? true };
-    }
-    if (app.id === "youtube") {
-      return { ...app, connected: options?.connectYoutube ?? false };
-    }
-    return app;
+
+  const wanted: Record<string, boolean> = {
+    gmail: options?.connectGmail ?? true,
+    youtube: options?.connectYoutube ?? false,
+    canvas: options?.connectCanvas ?? true,
+    github: options?.connectGithub ?? true,
+  };
+
+  state.plugins = state.plugins.map((plugin) => {
+    if (!(plugin.id in wanted)) return plugin;
+    const connected = wanted[plugin.id]!;
+    const def = getPluginDef(plugin.id);
+    return {
+      ...plugin,
+      connected: connected && Boolean(def?.implemented),
+      connectedAt: connected ? now : null,
+    };
   });
-  state.standingGoals = state.standingGoals.map((g) =>
-    g.id === "sg-inbox" && (options?.connectGmail ?? true)
-      ? { ...g, status: "watching" }
-      : g,
-  );
+  state.standingGoals = defaultPluginStandingGoals(state.plugins);
+
   state.messages = [
     {
       id: randomUUID(),
       role: "assistant",
-      content: `I'm ${trimmed} — your always-on Dot. I orchestrate work across threads on my cloud computer, ping you when something important lands, and pause for logins or PRs that need your hands.\n\nTry: “Build a Dots vs Muse vs Grokbot comparison site” or “Analyze my last 10 YouTube videos.”`,
+      content: `I'm ${trimmed} — your always-on Dot. Connect life surfaces in **Plugins**, keep standing goals watching in the background, and I'll orchestrate the work.\n\nTry: “Check Canvas for what's due” or “Triage my GitHub issues.”`,
       createdAt: now,
     },
   ];
@@ -367,7 +351,7 @@ export async function createDot(
     {
       id: randomUUID(),
       type: "info",
-      text: `${trimmed} is online — cloud computer + local access ready.`,
+      text: `${trimmed} is online — plugin registry ready.`,
       createdAt: now,
     },
   ];

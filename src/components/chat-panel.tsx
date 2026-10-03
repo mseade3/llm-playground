@@ -10,8 +10,8 @@ import type { AvatarTone, Message, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
-  "Build a Dots vs Muse vs Grokbot comparison site.",
-  "Analyze my last 10 YouTube videos in Studio.",
+  "Check Canvas for what's due in the next 48 hours.",
+  "Triage my GitHub issues and propose behind-the-scenes fixes.",
   "Remove the old inventory API before it gets shut down.",
 ];
 

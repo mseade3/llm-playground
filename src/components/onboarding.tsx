@@ -22,12 +22,16 @@ export function Onboarding({
     tone: AvatarTone;
     connectGmail: boolean;
     connectYoutube: boolean;
+    connectCanvas: boolean;
+    connectGithub: boolean;
   }) => Promise<void>;
 }) {
   const [name, setName] = useState("Winston");
   const [tone, setTone] = useState<AvatarTone>("teal");
   const [connectGmail, setConnectGmail] = useState(true);
   const [connectYoutube, setConnectYoutube] = useState(false);
+  const [connectCanvas, setConnectCanvas] = useState(true);
+  const [connectGithub, setConnectGithub] = useState(true);
   const [busy, setBusy] = useState(false);
 
   return (
@@ -40,11 +44,11 @@ export function Onboarding({
           Create your Dot
         </p>
         <h1 className="font-heading mt-3 text-5xl tracking-tight text-zinc-50 md:text-6xl">
-          Meet your always-on agent
+          Plug in your life
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-zinc-400 md:text-base">
-          Name it, connect apps, then orchestrate work from one chat — cloud
-          computer, proactive inbox, and take-over when login hits.
+          Connect school, code, and inbox surfaces now. Add money plugins later
+          from the registry — Dot keeps standing goals watching behind the scenes.
         </p>
 
         <div className="mx-auto mt-8 flex justify-center">
@@ -61,6 +65,8 @@ export function Onboarding({
               tone,
               connectGmail,
               connectYoutube,
+              connectCanvas,
+              connectGithub,
             }).finally(() => setBusy(false));
           }}
         >
@@ -103,33 +109,33 @@ export function Onboarding({
 
           <div>
             <label className="mb-2 block text-xs font-medium text-zinc-400">
-              Plugins
+              Start with these plugins
             </label>
             <div className="space-y-2">
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-zinc-700/80 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200">
-                <span>
-                  Gmail{" "}
-                  <span className="text-zinc-500">· proactive inbox</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={connectGmail}
-                  onChange={(e) => setConnectGmail(e.target.checked)}
-                  className="h-4 w-4 accent-teal-500"
-                />
-              </label>
-              <label className="flex cursor-pointer items-center justify-between rounded-xl border border-zinc-700/80 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200">
-                <span>
-                  YouTube{" "}
-                  <span className="text-zinc-500">· Studio analytics</span>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={connectYoutube}
-                  onChange={(e) => setConnectYoutube(e.target.checked)}
-                  className="h-4 w-4 accent-teal-500"
-                />
-              </label>
+              {(
+                [
+                  ["Canvas", connectCanvas, setConnectCanvas, "school · due dates"],
+                  ["GitHub", connectGithub, setConnectGithub, "build · issues/PRs"],
+                  ["Gmail", connectGmail, setConnectGmail, "comms · proactive"],
+                  ["YouTube", connectYoutube, setConnectYoutube, "content · analytics"],
+                ] as const
+              ).map(([label, checked, setChecked, hint]) => (
+                <label
+                  key={label}
+                  className="flex cursor-pointer items-center justify-between rounded-xl border border-zinc-700/80 bg-zinc-900/50 px-3 py-2.5 text-sm text-zinc-200"
+                >
+                  <span>
+                    {label}{" "}
+                    <span className="text-zinc-500">· {hint}</span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                    className="h-4 w-4 accent-teal-500"
+                  />
+                </label>
+              ))}
             </div>
           </div>
 

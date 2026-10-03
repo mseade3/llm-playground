@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PluginsPanel } from "@/components/plugins-panel";
+import { getPluginDef } from "@/lib/plugins/registry";
 import type { RuleMode, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +34,9 @@ export function SidePanel({
   onComputerMode,
   onAddMemory,
   onUpdateRule,
-  onToggleApp,
+  onTogglePlugin,
+  onSyncPlugin,
+  onToggleGoal,
   onSelectTask,
   onResolveAuth,
 }: {
@@ -45,7 +49,9 @@ export function SidePanel({
     text: string,
   ) => Promise<void>;
   onUpdateRule: (ruleId: string, mode: RuleMode) => Promise<void>;
-  onToggleApp: (appId: string) => Promise<void>;
+  onTogglePlugin: (pluginId: string) => Promise<void>;
+  onSyncPlugin: (pluginId: string) => Promise<void>;
+  onToggleGoal: (goalId: string, enabled: boolean) => Promise<void>;
   onSelectTask: (taskId: string) => Promise<void>;
   onResolveAuth: () => Promise<void>;
 }) {
@@ -63,31 +69,44 @@ export function SidePanel({
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-l border-zinc-800 bg-zinc-950/50 backdrop-blur">
-      <Tabs defaultValue="threads" className="flex h-full min-h-0 flex-col">
+      <Tabs defaultValue="plugins" className="flex h-full min-h-0 flex-col">
         <div className="border-b border-zinc-800 px-2 pt-3">
-          <TabsList className="grid w-full grid-cols-5 bg-zinc-900/80">
-            <TabsTrigger value="threads" className="px-1 text-[10px] sm:text-xs">
+          <TabsList className="grid w-full grid-cols-6 bg-zinc-900/80">
+            <TabsTrigger value="plugins" className="px-0.5 text-[10px] sm:text-xs">
+              <Plug className="mr-0.5 h-3.5 w-3.5" />
+              Plug
+            </TabsTrigger>
+            <TabsTrigger value="threads" className="px-0.5 text-[10px] sm:text-xs">
               <Layers className="mr-0.5 h-3.5 w-3.5" />
               Threads
             </TabsTrigger>
-            <TabsTrigger value="computer" className="px-1 text-[10px] sm:text-xs">
+            <TabsTrigger value="computer" className="px-0.5 text-[10px] sm:text-xs">
               <Monitor className="mr-0.5 h-3.5 w-3.5" />
               Comp
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="px-1 text-[10px] sm:text-xs">
+            <TabsTrigger value="tasks" className="px-0.5 text-[10px] sm:text-xs">
               <ListTodo className="mr-0.5 h-3.5 w-3.5" />
               Tasks
             </TabsTrigger>
-            <TabsTrigger value="rules" className="px-1 text-[10px] sm:text-xs">
+            <TabsTrigger value="rules" className="px-0.5 text-[10px] sm:text-xs">
               <Shield className="mr-0.5 h-3.5 w-3.5" />
               Rules
             </TabsTrigger>
-            <TabsTrigger value="activity" className="px-1 text-[10px] sm:text-xs">
+            <TabsTrigger value="activity" className="px-0.5 text-[10px] sm:text-xs">
               <Activity className="mr-0.5 h-3.5 w-3.5" />
               Live
             </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="plugins" className="mt-0 min-h-0 flex-1">
+          <PluginsPanel
+            state={state}
+            onToggle={onTogglePlugin}
+            onSync={onSyncPlugin}
+            onToggleGoal={onToggleGoal}
+          />
+        </TabsContent>
 
         <TabsContent value="threads" className="mt-0 min-h-0 flex-1">
           <ScrollArea className="h-full">
@@ -241,23 +260,23 @@ export function SidePanel({
             </div>
 
             <div className="mb-3 flex flex-wrap gap-1.5">
-              {state.apps.map((app) => (
-                <button
-                  key={app.id}
-                  type="button"
-                  onClick={() => void onToggleApp(app.id)}
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] ring-1 transition",
-                    app.connected
-                      ? "bg-teal-500/15 text-teal-200 ring-teal-500/30"
-                      : "bg-zinc-900 text-zinc-500 ring-zinc-700",
-                  )}
-                  title={app.detail}
-                >
-                  <Plug className="h-2.5 w-2.5" />
-                  {app.name}
-                </button>
-              ))}
+              {state.plugins
+                .filter((p) => p.connected)
+                .map((plugin) => {
+                  const def = getPluginDef(plugin.id);
+                  return (
+                    <button
+                      key={plugin.id}
+                      type="button"
+                      onClick={() => void onTogglePlugin(plugin.id)}
+                      className="inline-flex items-center gap-1 rounded-full bg-teal-500/15 px-2 py-0.5 text-[10px] text-teal-200 ring-1 ring-teal-500/30"
+                      title={def?.detail}
+                    >
+                      <Plug className="h-2.5 w-2.5" />
+                      {def?.name ?? plugin.id}
+                    </button>
+                  );
+                })}
             </div>
 
             <div className="mb-2 flex gap-1 overflow-x-auto">
