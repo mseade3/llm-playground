@@ -96,11 +96,11 @@ export function Workspace() {
         />
       </div>
 
-      <main className="relative z-10 grid min-w-0 flex-1 grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+      <main className="relative z-10 grid min-w-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
         <div
           className={cn(
             "min-h-0",
-            mobilePane === "computer" && "hidden xl:block",
+            mobilePane === "computer" && "hidden lg:block",
           )}
         >
           {state.view === "chat" && (
@@ -278,7 +278,7 @@ export function Workspace() {
         <div
           className={cn(
             "min-h-0",
-            mobilePane === "chat" && "hidden xl:block",
+            mobilePane === "chat" && "hidden lg:block",
           )}
         >
           <ComputerPanel
@@ -291,7 +291,7 @@ export function Workspace() {
         </div>
       </main>
 
-      <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full border border-zinc-800 bg-zinc-950/90 p-1 xl:hidden">
+      <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full border border-zinc-800 bg-zinc-950/90 p-1 lg:hidden">
         <button
           type="button"
           onClick={() => setMobilePane("chat")}

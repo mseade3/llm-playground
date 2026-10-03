@@ -189,7 +189,10 @@ export async function saveReviewToSpace(reviewId: string, approved: boolean) {
 
     const dot = state.dots.find((d) => d.id === review.dotId);
     if (dot) {
-      dot.lastActivity = `Saved '${review.title.slice(0, 28)}…'`;
+      const shortTitle = review.title
+        .replace(/^Review before saving:\s*/i, "")
+        .slice(0, 28);
+      dot.lastActivity = `Saved '${shortTitle}${shortTitle.length >= 28 ? "…" : ""}'`;
       dot.lastActivityAt = now;
     }
   });
