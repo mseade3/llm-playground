@@ -133,7 +133,7 @@ export async function createReviewForStep(
 
   await updateState((state) => {
     const space = state.spaces.find((s) => s.id === review.targetSpaceId);
-    review.targetSpaceName = space?.name ?? "Launch";
+    review.targetSpaceName = space?.name ?? "Applications";
     state.reviews.unshift(review);
     const approval = state.approvals.find((a) => a.id === approvalId);
     if (approval) approval.reviewId = review.id;

@@ -100,7 +100,7 @@ export function defaultState(): WorkspaceState {
     selectedSpaceId: null,
     selectedPageId: null,
     view: "chat",
-    ownerName: "David McKay",
+    ownerName: "Miles Seade",
     lastProactiveAt: null,
     agentStatus: "idle",
     messages: [],
@@ -113,22 +113,29 @@ export function defaultState(): WorkspaceState {
     memory: [
       {
         id: randomUUID(),
-        kind: "preference",
-        text: "Prefer review-before-save for anything lasting in Spaces.",
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: randomUUID(),
-        kind: "preference",
-        text: "Scout researches; Quill writes; Relay handles #launch.",
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        id: randomUUID(),
         kind: "fact",
-        text: "OpenDots-style workspace: Spaces for pages, Dots for specialists, Computer for tools.",
+        text: "Owner: Miles Seade · CS Eng @ University of Michigan · mseade@umich.edu · GitHub mseade3.",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: randomUUID(),
+        kind: "project",
+        text: "Summer 2027 internship prep — deepen AADE (Ann Arbor Digital Growth Engine) as the lead portfolio project; also heads-notes, summer-automation, practicum ML rebuild.",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: randomUUID(),
+        kind: "preference",
+        text: "Prefer review-before-save for anything lasting in Spaces. Resume format: Wharton-style one-pager.",
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        id: randomUUID(),
+        kind: "preference",
+        text: "Scout researches roles & AADE evidence; Quill writes bullets/narratives; Relay tracks applications.",
         createdAt: now,
         updatedAt: now,
       },
@@ -141,7 +148,7 @@ export function defaultState(): WorkspaceState {
       {
         id: randomUUID(),
         type: "info",
-        text: "OpenDots workspace ready — create your profile to meet your Dots.",
+        text: "Miles’s 2027 internship workspace ready — create your Dot profile to begin.",
         createdAt: now,
       },
     ],
@@ -372,7 +379,7 @@ export async function createDot(
   state.onboarded = true;
   state.agentName = trimmed;
   state.avatarTone = avatarTone;
-  state.ownerName = options?.ownerName?.trim() || "David McKay";
+  state.ownerName = options?.ownerName?.trim() || "Miles Seade";
   state.computer = defaultComputer(trimmed);
 
   // Rename primary researcher to the chosen name while keeping Quill/Relay
@@ -418,7 +425,7 @@ export async function createDot(
     {
       id: randomUUID(),
       role: "assistant",
-      content: `I'm ${trimmed} — your research Dot. I work on a persistent computer with browser, files, and shell.\n\nTry the OpenDots flow: *Open Acme's Agents SDK announcement, summarize what they shipped, and save notes I can use in the launch brief.*`,
+      content: `I'm ${trimmed} — research Dot for Miles’s **Summer 2027 internship** workspace. We deepen **AADE** (Ann Arbor Digital Growth Engine) as the lead portfolio project, then turn evidence into applications.\n\nTry: *Review the AADE README metrics, draft portfolio talking points for Summer 2027 SWE internships, and save notes to Applications.*`,
       createdAt: now,
       dotId: "dot-scout",
     },
@@ -427,7 +434,7 @@ export async function createDot(
     {
       id: randomUUID(),
       type: "info",
-      text: `${trimmed}, Quill, and Relay are online — Spaces ready.`,
+      text: `${trimmed}, Quill, and Relay are online — Portfolio · Research · Applications ready.`,
       createdAt: now,
     },
   ];

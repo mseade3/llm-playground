@@ -144,7 +144,7 @@ export function Workspace() {
             <div className="h-full overflow-y-auto p-4 md:p-6">
               <h2 className="font-heading text-2xl text-zinc-50">Memory</h2>
               <p className="mt-1 text-sm text-zinc-500">
-                Shared notes across Scout, Quill, and Relay.
+                Shared notes across Scout, Quill, and Relay — AADE, roles, and apps.
               </p>
               <form
                 className="mt-4 flex gap-2"

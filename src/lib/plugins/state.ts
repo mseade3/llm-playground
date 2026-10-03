@@ -15,8 +15,8 @@ export function defaultPluginConnections(): PluginConnection[] {
       config:
         def.id === "github"
           ? {
-              owner: process.env.GITHUB_OWNER || "acme",
-              repo: process.env.GITHUB_REPO || "commerce",
+              owner: process.env.GITHUB_OWNER || "mseade3",
+              repo: process.env.GITHUB_REPO || "Ann-Arbor-Automation",
             }
           : ({} as Record<string, string>),
     };

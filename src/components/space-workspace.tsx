@@ -32,7 +32,13 @@ export function SpaceWorkspace({
         </p>
         <h2 className="font-heading text-2xl text-zinc-50">{space.name}</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          Pages Dots can save into after you approve.
+          {space.id === "space-portfolio"
+            ? "AADE depth, metrics, and systems notes."
+            : space.id === "space-research"
+              ? "Target roles and company research for Summer 2027."
+              : space.id === "space-apps"
+                ? "Resume bullets, tracker, and application drafts."
+                : "Pages Dots can save into after you approve."}
         </p>
       </header>
 

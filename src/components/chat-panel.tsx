@@ -10,9 +10,9 @@ import type { AvatarTone, Message, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
+  "Review the AADE README metrics, draft portfolio talking points for Summer 2027 SWE internships, and save notes to Applications.",
   "Check Canvas for what's due in the next 48 hours.",
   "Triage my GitHub issues and propose behind-the-scenes fixes.",
-  "Remove the old inventory API before it gets shut down.",
 ];
 
 function renderContent(content: string) {

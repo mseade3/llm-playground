@@ -8,25 +8,25 @@ type GithubConfig = {
 function mockIssues(owner: string, repo: string): PluginActionResult["items"] {
   return [
     {
-      id: "iss-214",
-      title: "Inventory v1 callers still hitting /v1 in admin",
-      subtitle: `${owner}/${repo} · bug · P1`,
-      url: `https://github.com/${owner}/${repo}/issues/214`,
-      meta: { labels: "bug,p1", comments: "3" },
+      id: "iss-12",
+      title: "Docs: sync SYSTEMS.md honest-limits with README metrics",
+      subtitle: `${owner}/${repo} · docs · P2`,
+      url: `https://github.com/${owner}/${repo}/issues/12`,
+      meta: { labels: "docs,portfolio", comments: "1" },
     },
     {
-      id: "iss-219",
-      title: "Add webhook retry for stock sync failures",
+      id: "iss-14",
+      title: "ml: export feature_importance.csv in train_lead_scorer summary",
       subtitle: `${owner}/${repo} · enhancement`,
-      url: `https://github.com/${owner}/${repo}/issues/219`,
-      meta: { labels: "enhancement", comments: "1" },
+      url: `https://github.com/${owner}/${repo}/issues/14`,
+      meta: { labels: "ml,enhancement", comments: "0" },
     },
     {
-      id: "iss-221",
-      title: "Docs: document gateway migration for partners",
-      subtitle: `${owner}/${repo} · docs`,
-      url: `https://github.com/${owner}/${repo}/issues/221`,
-      meta: { labels: "docs", comments: "0" },
+      id: "iss-15",
+      title: "Scraper: prefer Places path when GOOGLE_PLACES_API_KEY is set",
+      subtitle: `${owner}/${repo} · reliability`,
+      url: `https://github.com/${owner}/${repo}/issues/15`,
+      meta: { labels: "scraper", comments: "2" },
     },
   ];
 }
@@ -34,17 +34,17 @@ function mockIssues(owner: string, repo: string): PluginActionResult["items"] {
 function mockPrs(owner: string, repo: string): PluginActionResult["items"] {
   return [
     {
-      id: "pr-841",
-      title: "chore(checkout): migrate inventory client to /v2",
+      id: "pr-22",
+      title: "docs: tighten AADE architecture diagram for internship narrative",
       subtitle: `${owner}/${repo} · ready · CI green`,
-      url: `https://github.com/${owner}/${repo}/pull/841`,
+      url: `https://github.com/${owner}/${repo}/pull/22`,
       meta: { status: "ready" },
     },
     {
-      id: "pr-843",
-      title: "chore(admin): remove inventory v1 debug panel",
+      id: "pr-23",
+      title: "ml: add bench_pipeline.json to artifacts README table",
       subtitle: `${owner}/${repo} · draft`,
-      url: `https://github.com/${owner}/${repo}/pull/843`,
+      url: `https://github.com/${owner}/${repo}/pull/23`,
       meta: { status: "draft" },
     },
   ];
@@ -109,8 +109,9 @@ export async function runGithubAction(
   mode: PluginMode,
   config: GithubConfig = {},
 ): Promise<PluginActionResult> {
-  const owner = config.owner || process.env.GITHUB_OWNER || "acme";
-  const repo = config.repo || process.env.GITHUB_REPO || "commerce";
+  const owner = config.owner || process.env.GITHUB_OWNER || "mseade3";
+  const repo =
+    config.repo || process.env.GITHUB_REPO || "Ann-Arbor-Automation";
   const token = process.env.GITHUB_TOKEN?.trim();
 
   if (mode === "live" && token) {
@@ -141,6 +142,8 @@ export async function runGithubAction(
     items,
     artifact: `# GitHub issues — ${owner}/${repo} (mock)\n\n${items
       .map((i) => `- ${i.title} — ${i.subtitle}`)
-      .join("\n")}\n\n## Suggested behind-the-scenes work\n1. Draft a fix for the P1 inventory callers\n2. Open a docs PR for partner migration\n3. Ask before merging anything`,
+      .join(
+        "\n",
+      )}\n\n## Suggested behind-the-scenes work\n1. Docs PR for SYSTEMS.md ↔ README metrics sync\n2. Export feature importance in train summary\n3. Ask before merging anything`,
   };
 }

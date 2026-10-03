@@ -98,6 +98,9 @@ export function OpenDotsNav({
           <p className="font-heading text-lg leading-none text-zinc-50">
             OpenDots
           </p>
+          <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.14em] text-teal-400/70">
+            Summer 2027 · Miles
+          </p>
         </div>
       </div>
 

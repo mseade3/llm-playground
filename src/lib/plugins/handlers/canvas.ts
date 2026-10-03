@@ -5,28 +5,28 @@ function mockAssignments(): PluginActionResult["items"] {
   const week = new Date(Date.now() + 5 * 86400 * 1000).toISOString();
   return [
     {
-      id: "asg-881",
-      title: "Lab 4 — Dependency graphs",
-      subtitle: "CS 320 · Software Engineering",
+      id: "asg-183",
+      title: "Project checkpoint — Elevators follow-ups",
+      subtitle: "EECS 183 · Elementary Programming Concepts",
       due: soon,
-      url: "https://canvas.example.edu/courses/320/assignments/881",
+      url: "https://umich.instructure.com/courses/183/assignments/1831",
+      meta: { points: "25", status: "not_submitted" },
+    },
+    {
+      id: "asg-140",
+      title: "Physics 140 — problem set 6",
+      subtitle: "PHYSICS 140 · General Physics I",
+      due: soon,
+      url: "https://umich.instructure.com/courses/140/assignments/1406",
       meta: { points: "40", status: "not_submitted" },
     },
     {
-      id: "asg-902",
-      title: "Reading response: Always-on agents",
-      subtitle: "HCI 210 · Design Futures",
-      due: soon,
-      url: "https://canvas.example.edu/courses/210/assignments/902",
-      meta: { points: "10", status: "not_submitted" },
-    },
-    {
-      id: "asg-915",
-      title: "Milestone 2 — Product brief",
-      subtitle: "ENT 401 · Venture Studio",
+      id: "asg-career",
+      title: "Career center — internship prep workshop",
+      subtitle: "UMich Career Center · optional",
       due: week,
-      url: "https://canvas.example.edu/courses/401/assignments/915",
-      meta: { points: "100", status: "drafted" },
+      url: "https://careercenter.umich.edu",
+      meta: { points: "0", status: "registered" },
     },
   ];
 }
@@ -34,19 +34,19 @@ function mockAssignments(): PluginActionResult["items"] {
 function mockCourses(): PluginActionResult["items"] {
   return [
     {
-      id: "c-320",
-      title: "CS 320 — Software Engineering",
-      subtitle: "Spring · active",
+      id: "c-183",
+      title: "EECS 183 — Elementary Programming Concepts",
+      subtitle: "UMich · active",
     },
     {
-      id: "c-210",
-      title: "HCI 210 — Design Futures",
-      subtitle: "Spring · active",
+      id: "c-140",
+      title: "PHYSICS 140 — General Physics I",
+      subtitle: "UMich · active",
     },
     {
-      id: "c-401",
-      title: "ENT 401 — Venture Studio",
-      subtitle: "Spring · active",
+      id: "c-career",
+      title: "Career prep — Summer 2027 internships",
+      subtitle: "Standing goal · AADE portfolio depth",
     },
   ];
 }
@@ -142,8 +142,8 @@ ${dueSoon
   .join("\n")}
 
 ## Study plan Dot can run behind the scenes
-1. Outline Lab 4 dependency-graph solution (45m)
-2. Draft HCI reading response from notes (25m)
-3. Ping you tonight if either is still unsubmitted`,
+1. Finish EECS checkpoint outline (40m)
+2. Physics problem set block (50m)
+3. Protect 45m for AADE portfolio depth tonight`,
   };
 }

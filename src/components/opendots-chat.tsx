@@ -26,7 +26,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
-  "Open Acme's Agents SDK announcement, summarize what they shipped, and save notes I can use in the launch brief.",
+  "Review the AADE README metrics, draft portfolio talking points for Summer 2027 SWE internships, and save notes to Applications.",
   "Check Canvas for what's due in the next 48 hours.",
   "Triage my GitHub issues and propose behind-the-scenes fixes.",
 ];

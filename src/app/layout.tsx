@@ -15,9 +15,9 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "OpenDots — specialist AI coworkers",
+  title: "OpenDots — Miles Seade · Summer 2027",
   description:
-    "Spaces, specialist Dots, and a persistent computer with review-before-save — an OpenDots-inspired always-on agent workspace.",
+    "Internship prep workspace for Miles Seade: deepen AADE, research SWE/cloud roles, and ship applications with specialist Dots.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

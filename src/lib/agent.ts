@@ -52,97 +52,106 @@ type PlanSeed = {
 const PLANS: PlanSeed[] = [
   {
     match:
-      /acme|agents sdk|launch brief|summarize what they shipped|save notes/i,
-    goalLabel: "Acme Agents SDK — research notes",
+      /aade|ann.?arbor|portfolio talking|internship brief|summer 2027|save notes.*application|metrics.*portfolio|talking points/i,
+    goalLabel: "AADE portfolio — talking points",
     threadLabel: "Scout · computer",
     workerModel: "Scout",
     preferredDotId: "dot-scout",
     memory: {
       kind: "project",
-      text: "Researching Acme Agents SDK announcement for the Launch brief.",
+      text: "Deepening AADE (Ann Arbor Digital Growth Engine) evidence for Miles’s Summer 2027 internship applications.",
     },
     steps: [
       {
-        title: "Open Acme Agents SDK announcement",
+        title: "Open AADE README",
         kind: "browse",
-        detail: "Opening it on my computer.",
+        detail: "Opening the public AADE README on my computer.",
         browse: {
-          title: "Acme Agents SDK",
-          url: "https://acme.dev/blog/agents-sdk",
+          title: "Ann Arbor Digital Growth Engine",
+          url: "https://github.com/mseade3/Ann-Arbor-Automation",
           content:
-            "Acme Agents SDK — Announcement\n\nShip hosted agents with tool calling and traces.\n• Hosted agent runtime\n• Tool calling + structured traces\n• No UI layer\n• No human-in-the-loop primitives\n• Agents run on Acme's servers only\n\nGet started with npm i @acme/agents",
+            "AADE — Ann Arbor Digital Growth Engine\n\nMaps/Places → SQLite → outreach + mockups → Streamlit\n+ lead-priority ML (logistic regression + random forest)\n\nHoldout (n=2500 synthetic, proxy worth_outreach):\n• LR F1 0.860 · RF F1 0.933\nBench n=5000: ~712k rows/s score path\n\nHonest limits: proxy labels ≠ measured conversions; Maps scrape is fragile.",
         },
-        result: "Opened acme.dev/blog/agents-sdk",
+        result: "Opened mseade3/Ann-Arbor-Automation README",
         durationMs: 1400,
       },
       {
-        title: "Save research notes file",
+        title: "Save portfolio notes file",
         kind: "file",
-        detail: "Saved file `~/notes/acme-agents-sdk.md` — 2.1 KB",
+        detail: "Saved file `~/notes/aade-talking-points.md` — 2.4 KB",
         fileWrite: {
-          path: "~/notes/acme-agents-sdk.md",
-          sizeLabel: "2.1 KB",
-          content: `# Acme Agents SDK — notes
+          path: "~/notes/aade-talking-points.md",
+          sizeLabel: "2.4 KB",
+          content: `# AADE — portfolio talking points
 
-Acme shipped a hosted agent runtime with tool calling and traces.
+Miles Seade · Summer 2027 SWE / cloud internships
 
-Gaps vs OpenDots:
-- No UI layer
-- No human-in-the-loop primitives
-- Agents run on Acme's servers only
+## One-liner
+Built a local SMB lead engine for Ann Arbor: Maps/Places → SQLite → outreach → Streamlit, plus a measured lead-priority ML layer.
 
-Useful for Launch brief contrast section.`,
+## Metrics to cite
+- RF F1 **0.933** / LR F1 **0.860** on proxy-labeled holdout (n=2500)
+- Score-path throughput ~**712k rows/s** on synthetic bench (n=5000)
+
+## Systems story
+Discovery → persist → generate → operate → score. Prefer Places API over fragile Maps scrape when keyed.
+
+## Honest framing
+Proxy labels are not CRM conversions — say so in interviews.`,
         },
-        result: "Saved ~/notes/acme-agents-sdk.md",
+        result: "Saved ~/notes/aade-talking-points.md",
         durationMs: 1100,
       },
       {
         title: "Verify note length",
         kind: "shell",
-        detail: "Ran `wc -l ~/notes/acme-agents-sdk.md` → 41 lines",
+        detail: "Ran `wc -l ~/notes/aade-talking-points.md` → 28 lines",
         terminal: {
-          command: "wc -l ~/notes/acme-agents-sdk.md",
-          output: "41 ~/notes/acme-agents-sdk.md",
+          command: "wc -l ~/notes/aade-talking-points.md",
+          output: "28 ~/notes/aade-talking-points.md",
         },
-        result: "41 lines",
+        result: "28 lines",
         durationMs: 900,
       },
       {
-        title: "Save notes to Launch",
+        title: "Save notes to Applications",
         kind: "write",
-        detail: "Review before saving into the Launch space.",
+        detail: "Review before saving into the Applications space.",
         requiresApproval: true,
         review: {
-          title: "Review before saving: Acme Agents SDK — notes",
-          targetSpaceId: "space-launch",
+          title: "Review before saving: AADE portfolio talking points",
+          targetSpaceId: "space-apps",
           summary:
-            "Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, no human-in-the-loop primitives, and agents run on Acme's servers only.",
-          body: `# Acme Agents SDK — notes
+            "AADE one-liner, holdout F1 metrics, bench throughput, and honest proxy-label framing for Miles’s Summer 2027 internship apps.",
+          body: `# AADE — portfolio talking points
 
-Acme shipped a hosted agent runtime with tool calling and traces.
+Miles Seade · Summer 2027 SWE / cloud internships
 
-## What they shipped
-- Hosted agent runtime
-- Tool calling
-- Structured traces
+## One-liner
+Built a local SMB lead engine for Ann Arbor: Maps/Places → SQLite → outreach → Streamlit, plus a measured lead-priority ML layer.
 
-## Gaps (for Launch brief)
-- No UI layer
-- No human-in-the-loop primitives
-- Agents run on Acme's servers only
+## Metrics to cite
+- RF F1 **0.933** / LR F1 **0.860** on proxy-labeled holdout (n=2500)
+- Score-path throughput ~**712k rows/s** on synthetic bench (n=5000)
 
-## How we win
-OpenDots keeps specialist Dots, Spaces, and a persistent computer you can take over.`,
+## Systems story
+Discovery → persist → generate → operate → score. Prefer Places API over fragile Maps scrape when keyed.
+
+## Honest framing
+Proxy labels are not CRM conversions — say so in interviews.
+
+## Next
+Paste strongest bullets into the Wharton-style one-pager; link github.com/mseade3/Ann-Arbor-Automation.`,
         },
-        result: "Notes saved to Launch",
+        result: "Notes saved to Applications",
         durationMs: 700,
       },
     ],
-    artifact: `# Acme Agents SDK — notes
+    artifact: `# AADE — portfolio talking points
 
-Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, no human-in-the-loop primitives, and agents run on Acme's servers only.`,
+Built a local SMB lead engine for Ann Arbor: Maps/Places → SQLite → outreach → Streamlit + lead-priority ML (RF F1 0.933 on proxy holdout).`,
     reply: (name) =>
-      `${name} will open the announcement on my computer, save notes, and ask before dropping them into Launch.`,
+      `${name} will open the AADE README on my computer, draft portfolio talking points, and ask before saving them into Applications.`,
   },
   {
     match: /canvas|assignment|homework|due date|what's due|what is due|school/i,
@@ -162,7 +171,7 @@ Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, n
           title: "Canvas · Upcoming",
           url: "https://canvas.example.edu/calendar",
           content:
-            "Plugin: Canvas (mock unless CANVAS_* env set)\nSyncing users/self/upcoming_events…\n2 items due within 48h · 1 milestone this week.",
+            "Plugin: Canvas (mock unless CANVAS_* env set)\nSyncing users/self/upcoming_events…\n2 items due within 48h · EECS + Physics.",
         },
         result: "Synced Canvas upcoming assignments.",
         durationMs: 1200,
@@ -171,14 +180,14 @@ Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, n
         title: "Prioritize next 48 hours",
         kind: "analyze",
         detail: "Ranking by due date and points.",
-        result: "Lab 4 and HCI reading response need attention first.",
+        result: "EECS checkpoint and Physics problem set need attention first.",
         durationMs: 1100,
       },
       {
         title: "Draft study plan",
         kind: "draft",
         detail: "Building a behind-the-scenes plan Dot can keep watching.",
-        result: "Study plan drafted with time blocks.",
+        result: "Study plan drafted with time blocks + AADE depth slot.",
         durationMs: 1400,
       },
       {
@@ -193,27 +202,29 @@ Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, n
     artifact: `# Canvas — next 48 hours
 
 ## Due soon
-1. **Lab 4 — Dependency graphs** (CS 320) · ~36h
-2. **Reading response: Always-on agents** (HCI 210) · ~36h
+1. **EECS 183 checkpoint** · ~36h
+2. **Physics 140 problem set 6** · ~36h
 
 ## Later this week
-3. **Milestone 2 — Product brief** (ENT 401)
+3. **Career center — internship prep workshop**
 
 ## Behind-the-scenes plan
-- Tonight: outline Lab 4 (45m)
-- Tonight: draft reading response (25m)
+- Tonight: EECS checkpoint outline (40m)
+- Tonight: Physics problem set block (50m)
+- Protect 45m for AADE portfolio depth
 - Dot keeps the Canvas standing goal on watch and pings if still open`,
     reply: (name) =>
       `${name} will sync Canvas, prioritize what's due in 48 hours, and draft a study plan — then ask before pinning it to standing goals.`,
   },
   {
     match: /github issues|triage|open issues|repo issues|behind the scenes.*git/i,
-    goalLabel: "GitHub issue triage",
-    threadLabel: "GitHub · issues",
-    workerModel: "Astra",
+    goalLabel: "AADE GitHub issue triage",
+    threadLabel: "GitHub · AADE",
+    workerModel: "Scout",
+    preferredDotId: "dot-scout",
     memory: {
       kind: "project",
-      text: "Triage GitHub issues and propose behind-the-scenes fixes.",
+      text: "Triage AADE GitHub issues for portfolio depth work.",
     },
     steps: [
       {
@@ -222,49 +233,49 @@ Acme shipped a hosted agent runtime with tool calling and traces. No UI layer, n
         detail: "Reading issues via the GitHub plugin.",
         browse: {
           title: "GitHub · Issues",
-          url: "https://github.com/acme/commerce/issues",
+          url: "https://github.com/mseade3/Ann-Arbor-Automation/issues",
           content:
-            "Plugin: GitHub (mock unless GITHUB_TOKEN set)\nOpen: #214 P1 inventory callers · #219 webhook retries · #221 partner docs",
+            "Plugin: GitHub (mock unless GITHUB_TOKEN set)\nOpen: #12 docs SYSTEMS sync · #14 feature_importance export · #15 Places path preference",
         },
-        result: "Synced open issues from the default repo.",
+        result: "Synced open issues from mseade3/Ann-Arbor-Automation.",
         durationMs: 1200,
       },
       {
-        title: "Rank by impact",
+        title: "Rank by portfolio impact",
         kind: "analyze",
-        detail: "P1 bugs first, then docs that unblock partners.",
-        result: "P1 inventory callers should be first behind-the-scenes job.",
+        detail: "Docs honesty and ML artifacts first — interview story quality.",
+        result: "Docs SYSTEMS sync should be first behind-the-scenes job.",
         durationMs: 1000,
       },
       {
         title: "Propose fix threads",
         kind: "draft",
         detail: "Queue draft work Dot can run after you approve.",
-        result: "Proposed 2 fix threads + 1 docs PR.",
+        result: "Proposed 1 docs PR + 1 ML artifact polish.",
         durationMs: 1400,
       },
       {
         title: "Enable GitHub standing goals",
         kind: "write",
-        detail: "Keep issue triage watching after this run.",
+        detail: "Keep AADE issue triage watching after this run.",
         requiresApproval: true,
         result: "GitHub standing goals enabled.",
         durationMs: 700,
       },
     ],
-    artifact: `# GitHub triage
+    artifact: `# AADE GitHub triage
 
 ## Open issues
-1. **#214** Inventory v1 callers still hitting /v1 in admin · P1
-2. **#219** Webhook retry for stock sync · enhancement
-3. **#221** Partner migration docs · docs
+1. **#12** Docs: sync SYSTEMS.md honest-limits with README metrics
+2. **#14** ml: export feature_importance.csv in train summary
+3. **#15** Scraper: prefer Places path when keyed
 
 ## Behind-the-scenes queue
-1. Spin a worker thread for #214
-2. Draft docs PR for #221
+1. Docs PR for #12
+2. ML artifact polish for #14
 3. Ask before opening any PR (rule: ask)`,
     reply: (name) =>
-      `${name} will sync GitHub issues, rank them, and propose behind-the-scenes fix threads — approval before enabling ongoing triage.`,
+      `${name} will sync AADE issues, rank them for portfolio impact, and propose fix threads — approval before enabling ongoing triage.`,
   },
   {
     match: /muse|grokbot|grok bot|comparison site|use cases|dots vs/i,
@@ -1426,16 +1437,16 @@ export async function resolveAuthChallenge(): Promise<WorkspaceState> {
 
 const PROACTIVE_SNIPPETS = [
   {
-    subject: "Acme Studio — contract revision",
-    body: "Just got an email from **Jordan at Acme Studio** asking if we can move the inventory cutover to Thursday. Want me to draft a reply or update the standing goal?",
+    subject: "Internship inbox — recruiter reply",
+    body: "New mail looks like a **SWE intern recruiter** follow-up. Want me to draft a reply that leads with AADE metrics, or just log it in Applications?",
   },
   {
-    subject: "Bright Harbor — invoice question",
-    body: "Heads up — **Bright Harbor** replied on invoice #1108 saying payment lands Friday. I logged it against the receivables thread.",
+    subject: "AADE repo — CI / docs nudge",
+    body: "GitHub ping on **mseade3/Ann-Arbor-Automation**: docs reminder to keep SYSTEMS.md honest-limits in sync with the README metrics table.",
   },
   {
-    subject: "Hiring loop — design trial",
-    body: "New mail: a design trial candidate accepted the take-home. Should I schedule a review block or leave it for you?",
+    subject: "Canvas — EECS checkpoint",
+    body: "Canvas shows an upcoming checkpoint. Should I block study time tonight so internship portfolio depth doesn’t slip?",
   },
 ];
 

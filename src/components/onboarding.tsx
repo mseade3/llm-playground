@@ -28,7 +28,7 @@ export function Onboarding({
   }) => Promise<void>;
 }) {
   const [name, setName] = useState("Scout");
-  const [ownerName, setOwnerName] = useState("David McKay");
+  const [ownerName, setOwnerName] = useState("Miles Seade");
   const [tone, setTone] = useState<AvatarTone>("coral");
   const [connectGmail, setConnectGmail] = useState(true);
   const [connectYoutube, setConnectYoutube] = useState(false);
@@ -38,8 +38,10 @@ export function Onboarding({
 
   return (
     <div className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,120,110,0.22)_0%,_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(30,40,38,0.9)_0%,_transparent_45%),linear-gradient(180deg,_#0b100f_0%,_#121816_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,120,110,0.26)_0%,_transparent_52%),radial-gradient(ellipse_at_bottom_left,_rgba(180,140,40,0.12)_0%,_transparent_42%),radial-gradient(ellipse_at_bottom_right,_rgba(30,40,38,0.9)_0%,_transparent_45%),linear-gradient(180deg,_#0b100f_0%,_#121816_100%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(rgba(120,200,180,0.12)_0.7px,transparent_0.7px)] [background-size:20px_20px]" />
+      <div className="pointer-events-none absolute -left-20 top-24 h-56 w-56 animate-[dot-bob_6s_ease-in-out_infinite] rounded-full bg-teal-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-28 h-48 w-48 animate-[dot-bob_7s_ease-in-out_infinite_reverse] rounded-full bg-amber-400/10 blur-3xl" />
 
       <div className="relative z-10 w-full max-w-lg text-center">
         <div className="mx-auto mb-4 grid h-8 w-8 grid-cols-3 gap-0.5 p-1">
@@ -54,23 +56,15 @@ export function Onboarding({
           ))}
         </div>
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-teal-300/70">
-          OpenDots
+          OpenDots · Miles Seade
         </p>
         <h1 className="font-heading mt-3 text-5xl tracking-tight text-zinc-50 md:text-6xl">
-          Meet your Dots
+          Summer 2027 workspace
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-zinc-400 md:text-base">
-          Specialist agents with Spaces, a persistent computer, and
-          review-before-save — inspired by{" "}
-          <a
-            href="https://www.copilotkit.ai/opendots"
-            className="text-teal-300 underline-offset-2 hover:underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            CopilotKit OpenDots
-          </a>
-          .
+          Specialist Dots for internship prep — deepen{" "}
+          <span className="text-teal-200/90">AADE</span>, research target roles,
+          and ship application copy with review-before-save.
         </p>
 
         <div className="mx-auto mt-8 flex justify-center">
@@ -89,7 +83,7 @@ export function Onboarding({
               connectYoutube,
               connectCanvas,
               connectGithub,
-              ownerName: ownerName.trim() || "David McKay",
+              ownerName: ownerName.trim() || "Miles Seade",
             }).finally(() => setBusy(false));
           }}
         >
@@ -117,7 +111,7 @@ export function Onboarding({
               className="h-11 rounded-xl border-zinc-700 bg-zinc-900/80 text-base text-zinc-100"
             />
             <p className="mt-1.5 text-[11px] text-zinc-500">
-              Quill (writer) and Relay (comms) join automatically.
+              Quill (writer) and Relay (applications) join automatically.
             </p>
           </div>
 
@@ -152,10 +146,10 @@ export function Onboarding({
             <div className="space-y-2">
               {(
                 [
-                  ["Canvas", connectCanvas, setConnectCanvas, "school · due dates"],
-                  ["GitHub", connectGithub, setConnectGithub, "build · issues/PRs"],
-                  ["Gmail", connectGmail, setConnectGmail, "comms · proactive"],
-                  ["YouTube", connectYoutube, setConnectYoutube, "content · analytics"],
+                  ["Canvas", connectCanvas, setConnectCanvas, "UMich · due dates"],
+                  ["GitHub", connectGithub, setConnectGithub, "AADE · issues/PRs"],
+                  ["Gmail", connectGmail, setConnectGmail, "recruiters · proactive"],
+                  ["YouTube", connectYoutube, setConnectYoutube, "optional"],
                 ] as const
               ).map(([label, checked, setChecked, hint]) => (
                 <label
@@ -182,7 +176,9 @@ export function Onboarding({
             disabled={busy}
             className="h-11 w-full rounded-xl bg-teal-500 text-sm font-medium text-zinc-950 hover:bg-teal-400"
           >
-            {busy ? "Waking…" : `Enter OpenDots with ${name.trim() || "Scout"}`}
+            {busy
+              ? "Waking…"
+              : `Enter internship workspace with ${name.trim() || "Scout"}`}
           </Button>
         </form>
       </div>

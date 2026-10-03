@@ -55,7 +55,7 @@ export async function runPluginAction(
         items: [
           {
             id: "mail-1",
-            title: "Acme Studio — contract revision",
+            title: "SWE intern recruiter — follow-up",
             subtitle: "Needs reply · 12m ago",
           },
         ],

@@ -1,13 +1,27 @@
-# OpenDots workspace
+# OpenDots — Miles Seade · Summer 2027
 
-An [OpenDots](https://www.copilotkit.ai/opendots)-inspired always-on agent workspace built with Next.js. Specialist Dots (Scout, Quill, Relay) share **Spaces**, work on a persistent **Computer** (browser / files / terminal), and pause for **review-before-save**.
+An [OpenDots](https://www.copilotkit.ai/opendots)-inspired always-on agent workspace personalized for **Miles Seade** (CS Eng @ UMich) preparing for **Summer 2027** software / cloud engineering internships.
 
-Based on the patterns in [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDots) — Spaces, multi-Dot specialists, computer tools, and human-in-the-loop cards — running as a local mock agent (no Node 24 / OpenBot requirement).
+Lead portfolio project: **AADE — Ann Arbor Digital Growth Engine** ([mseade3/Ann-Arbor-Automation](https://github.com/mseade3/Ann-Arbor-Automation)) — Maps/Places → SQLite → outreach → Streamlit + lead-priority ML.
+
+Based on patterns in [CopilotKit/OpenDots](https://github.com/CopilotKit/OpenDots) — Spaces, multi-Dot specialists, computer tools, and human-in-the-loop cards — running as a local mock agent (no paid runtime required).
+
+## Spaces (internship workstreams)
+
+| Space | Purpose |
+| --- | --- |
+| **Portfolio** | Deepen AADE — architecture, metrics, honest limits |
+| **Research** | Target SWE / cloud roles and companies for Summer 2027 |
+| **Applications** | Wharton-style resume bullets, tracker, talking points |
+
+## Dots
+
+- **Scout** — research AADE evidence + role targets
+- **Quill** — resume / portfolio narrative writer
+- **Relay** — recruiter inbox + application tracking
 
 ## Features
 
-- **Spaces** — Launch & Research document homes; approved drafts become pages
-- **Dots** — Scout (research), Quill (writer), Relay (comms) with per-Dot permissions
 - **Computer** — Browser, Files, Terminal tabs + Take over
 - **Review cards** — Approve & save / Decline before writing to a Space
 - **Plugin registry** — Canvas, GitHub, Gmail, and more (mock or live tokens)
@@ -22,20 +36,28 @@ npm run dev
 
 Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
-## Try the OpenDots flow
+## Try the internship demo flow
 
 1. Create Scout (Quill + Relay join automatically)
-2. Ask: *Open Acme's Agents SDK announcement, summarize what they shipped, and save notes I can use in the launch brief.*
+2. Ask: *Review the AADE README metrics, draft portfolio talking points for Summer 2027 SWE internships, and save notes to Applications.*
 3. Watch browser → file → terminal actions inline
-4. **Approve & save** the review card into Launch
-5. Open the **Launch** Space to read the saved page
+4. **Approve & save** the review card into Applications
+5. Open the **Applications** Space to read the saved page
 
 ## Plugins
 
 | Plugin | Status | Live env |
 | --- | --- | --- |
 | Canvas | mock/live | `CANVAS_BASE_URL`, `CANVAS_API_TOKEN` |
-| GitHub | mock/live | `GITHUB_TOKEN` |
+| GitHub | mock/live | `GITHUB_TOKEN` (defaults to `mseade3/Ann-Arbor-Automation`) |
 | Gmail / Slack / YouTube | mock | — |
 
 State lives in `.data/workspace.json` (gitignored). Use **Settings → Reset** to start over.
+
+## Sources used for personalization
+
+- Cursor user preferences (`ann-arbor-automated` lead project, Wharton-style resume)
+- Public GitHub profile [mseade3](https://github.com/mseade3) + AADE README
+- Owner identity: Miles Seade · mseade@umich.edu
+
+No single employer is claimed as fact — this is framed as Miles’s internship **project workspace**.
