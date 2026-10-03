@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${instrument.variable} h-full antialiased`}
+      className={`dark ${outfit.variable} ${instrument.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans">
         <TooltipProvider>{children}</TooltipProvider>

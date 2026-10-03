@@ -10,20 +10,27 @@ import type { AvatarTone, Message, WorkspaceState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = [
+  "Build a Dots vs Muse vs Grokbot comparison site.",
+  "Analyze my last 10 YouTube videos in Studio.",
   "Remove the old inventory API before it gets shut down.",
-  "Research three competitors for a neighborhood coffee shop and draft a one-page brief.",
-  "Pull overdue invoices and draft polite follow-up emails.",
 ];
 
 function renderContent(content: string) {
   return content.split("\n").map((line, i) => (
     <p key={i} className={cn(i > 0 && "mt-2", "whitespace-pre-wrap")}>
-      {line.split(/(\*\*[^*]+\*\*)/g).map((part, j) => {
+      {line.split(/(\*\*[^*]+\*\*|_\([^)]+\)_)/g).map((part, j) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return (
-            <strong key={j} className="font-semibold">
+            <strong key={j} className="font-semibold text-zinc-50">
               {part.slice(2, -2)}
             </strong>
+          );
+        }
+        if (part.startsWith("_(") && part.endsWith(")_")) {
+          return (
+            <em key={j} className="text-zinc-500 not-italic">
+              {part.slice(1, -1)}
+            </em>
           );
         }
         return <span key={j}>{part}</span>;
@@ -79,13 +86,17 @@ export function ChatPanel({
                 className={cn(
                   "max-w-[92%] px-4 py-3 text-sm leading-relaxed md:max-w-[85%]",
                   message.role === "user"
-                    ? "rounded-2xl rounded-br-md bg-teal-800 text-teal-50"
-                    : "rounded-2xl rounded-bl-md bg-white/80 text-stone-800 shadow-sm ring-1 ring-stone-200/80",
+                    ? "rounded-2xl rounded-br-md bg-teal-600 text-teal-50"
+                    : "rounded-2xl rounded-bl-md bg-zinc-900/80 text-zinc-200 shadow-sm ring-1 ring-zinc-700/80",
                 )}
               >
                 {message.role === "assistant" && (
-                  <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-teal-700">
-                    <DotAvatar tone={avatarTone} size="sm" className="!h-5 !w-5" />
+                  <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-teal-300/90">
+                    <DotAvatar
+                      tone={avatarTone}
+                      size="sm"
+                      className="!h-5 !w-5"
+                    />
                     {agentName}
                   </div>
                 )}
@@ -94,7 +105,7 @@ export function ChatPanel({
             </div>
           ))}
           {sending && (
-            <div className="self-start rounded-2xl rounded-bl-md bg-white/80 px-4 py-3 text-sm text-stone-500 shadow-sm ring-1 ring-stone-200/80">
+            <div className="self-start rounded-2xl rounded-bl-md bg-zinc-900/80 px-4 py-3 text-sm text-zinc-400 shadow-sm ring-1 ring-zinc-700/80">
               {agentName} is picking up the thread…
             </div>
           )}
@@ -102,7 +113,7 @@ export function ChatPanel({
         </div>
       </ScrollArea>
 
-      <div className="border-t border-stone-200/70 bg-white/60 px-4 py-4 backdrop-blur md:px-6">
+      <div className="border-t border-zinc-800 bg-zinc-950/70 px-4 py-4 backdrop-blur md:px-6">
         <div className="mx-auto max-w-2xl">
           {messages.length <= 1 && (
             <div className="mb-3 flex flex-wrap gap-2">
@@ -111,7 +122,7 @@ export function ChatPanel({
                   key={s}
                   type="button"
                   onClick={() => void onSend(s)}
-                  className="rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-left text-xs text-stone-600 transition hover:border-teal-300 hover:text-teal-900"
+                  className="rounded-full border border-zinc-700 bg-zinc-900/70 px-3 py-1.5 text-left text-xs text-zinc-300 transition hover:border-teal-500/50 hover:text-teal-200"
                 >
                   {s}
                 </button>
@@ -119,7 +130,7 @@ export function ChatPanel({
             </div>
           )}
           {callNote && (
-            <p className="mb-2 rounded-lg bg-teal-50 px-3 py-2 text-xs text-teal-900 ring-1 ring-teal-100">
+            <p className="mb-2 rounded-lg bg-teal-500/10 px-3 py-2 text-xs text-teal-100 ring-1 ring-teal-500/25">
               {callNote}
             </p>
           )}
@@ -129,7 +140,7 @@ export function ChatPanel({
               onChange={(e) => setDraft(e.target.value)}
               placeholder={`Hand ${agentName} a goal…`}
               rows={2}
-              className="min-h-[72px] resize-none rounded-2xl border-stone-200 bg-white pr-24 text-sm shadow-sm"
+              className="min-h-[72px] resize-none rounded-2xl border-zinc-700 bg-zinc-900 pr-24 text-sm text-zinc-100 shadow-sm placeholder:text-zinc-500"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -142,30 +153,30 @@ export function ChatPanel({
                 type="button"
                 size="icon"
                 variant="outline"
-                className="h-9 w-9 rounded-xl border-stone-200 bg-white"
+                className="h-9 w-9 rounded-xl border-zinc-700 bg-zinc-900"
                 title={`Call ${agentName}`}
                 onClick={() => {
                   setCallNote(
-                    `Voice is a stub in this demo — message ${agentName} in chat the same way you'd talk through a change of direction.`,
+                    `Voice call stub — talk through direction in chat the same way you'd coach ${agentName} on a call.`,
                   );
                   window.setTimeout(() => setCallNote(null), 4200);
                 }}
               >
-                <Phone className="h-4 w-4 text-teal-800" />
+                <Phone className="h-4 w-4 text-teal-300" />
               </Button>
               <Button
                 type="submit"
                 size="icon"
                 disabled={!draft.trim() || sending}
-                className="h-9 w-9 rounded-xl bg-teal-800 text-white hover:bg-teal-700"
+                className="h-9 w-9 rounded-xl bg-teal-500 text-zinc-950 hover:bg-teal-400"
               >
                 <ArrowUp className="h-4 w-4" />
               </Button>
             </div>
           </form>
-          <p className="mt-2 text-[11px] text-stone-400">
-            Status: {agentStatus.replace("_", " ")} · works between messages on a
-            cloud computer
+          <p className="mt-2 text-[11px] text-zinc-500">
+            Status: {agentStatus.replace("_", " ")} · orchestrates threads ·
+            proactive when plugins allow
           </p>
         </div>
       </div>

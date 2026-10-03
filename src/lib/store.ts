@@ -20,6 +20,7 @@ function defaultComputer(name: string): ComputerState {
     mode: "agent",
     status: "idle",
     currentAction: undefined,
+    authChallenge: null,
     tabs: [
       {
         id: "home",
@@ -85,8 +86,14 @@ function defaultApps() {
     {
       id: "gmail",
       name: "Gmail",
+      connected: true,
+      detail: "Proactive inbox watch",
+    },
+    {
+      id: "youtube",
+      name: "YouTube",
       connected: false,
-      detail: "Connect to draft replies",
+      detail: "Studio analytics (needs login)",
     },
     {
       id: "notion",
@@ -118,8 +125,12 @@ export function defaultState(): WorkspaceState {
   const now = new Date().toISOString();
   return {
     onboarded: false,
-    agentName: "Alfred",
+    agentName: "Winston",
     avatarTone: "teal",
+    proactivity: "balanced",
+    localComputerConnected: true,
+    selectedTaskId: null,
+    lastProactiveAt: null,
     agentStatus: "idle",
     messages: [],
     tasks: [],
@@ -139,11 +150,18 @@ export function defaultState(): WorkspaceState {
         createdAt: now,
         updatedAt: now,
       },
+      {
+        id: randomUUID(),
+        kind: "preference",
+        text: "When remote, orchestrate Codex-style threads instead of making me hop between projects.",
+        createdAt: now,
+        updatedAt: now,
+      },
     ],
     rules: defaultRules(),
     apps: defaultApps(),
     standingGoals: defaultStandingGoals(),
-    computer: defaultComputer("Alfred"),
+    computer: defaultComputer("Winston"),
     activity: [
       {
         id: randomUUID(),
@@ -158,18 +176,28 @@ export function defaultState(): WorkspaceState {
 function migrate(raw: Partial<WorkspaceState> & { agentName?: string }): WorkspaceState {
   const base = defaultState();
   const name = raw.agentName || base.agentName;
+  const apps =
+    raw.apps?.some((a) => a.id === "youtube") ? raw.apps : base.apps;
   return {
     ...base,
     ...raw,
     onboarded: raw.onboarded ?? Boolean(raw.messages && raw.messages.length > 0),
     agentName: name,
     avatarTone: (raw.avatarTone as AvatarTone) || base.avatarTone,
+    proactivity: raw.proactivity ?? base.proactivity,
+    localComputerConnected: raw.localComputerConnected ?? true,
+    selectedTaskId: raw.selectedTaskId ?? null,
+    lastProactiveAt: raw.lastProactiveAt ?? null,
     rules: raw.rules?.length ? raw.rules : base.rules,
-    apps: raw.apps?.length ? raw.apps : base.apps,
+    apps,
     standingGoals: raw.standingGoals?.length
       ? raw.standingGoals
       : base.standingGoals,
-    computer: raw.computer ?? defaultComputer(name),
+    computer: {
+      ...defaultComputer(name),
+      ...(raw.computer ?? {}),
+      authChallenge: raw.computer?.authChallenge ?? null,
+    },
     messages: raw.messages ?? [],
     tasks: raw.tasks ?? [],
     approvals: raw.approvals ?? [],
@@ -304,32 +332,46 @@ export async function getApproval(
 export async function createDot(
   name: string,
   avatarTone: AvatarTone,
+  options?: { connectGmail?: boolean; connectYoutube?: boolean },
 ): Promise<WorkspaceState> {
-  const trimmed = name.trim().slice(0, 24) || "Alfred";
+  const trimmed = name.trim().slice(0, 24) || "Winston";
   const now = new Date().toISOString();
-  cache = {
-    ...defaultState(),
-    onboarded: true,
-    agentName: trimmed,
-    avatarTone,
-    computer: defaultComputer(trimmed),
-    messages: [
-      {
-        id: randomUUID(),
-        role: "assistant",
-        content: `I'm ${trimmed} — your always-on Dot. I keep projects moving on my cloud computer, learn how you like things done, and pause when a decision needs you.\n\nTry the DevDay classic: “Remove the old inventory API before it gets shut down.”`,
-        createdAt: now,
-      },
-    ],
-    activity: [
-      {
-        id: randomUUID(),
-        type: "info",
-        text: `${trimmed} is online and listening.`,
-        createdAt: now,
-      },
-    ],
-  };
+  const state = defaultState();
+  state.onboarded = true;
+  state.agentName = trimmed;
+  state.avatarTone = avatarTone;
+  state.computer = defaultComputer(trimmed);
+  state.apps = state.apps.map((app) => {
+    if (app.id === "gmail") {
+      return { ...app, connected: options?.connectGmail ?? true };
+    }
+    if (app.id === "youtube") {
+      return { ...app, connected: options?.connectYoutube ?? false };
+    }
+    return app;
+  });
+  state.standingGoals = state.standingGoals.map((g) =>
+    g.id === "sg-inbox" && (options?.connectGmail ?? true)
+      ? { ...g, status: "watching" }
+      : g,
+  );
+  state.messages = [
+    {
+      id: randomUUID(),
+      role: "assistant",
+      content: `I'm ${trimmed} — your always-on Dot. I orchestrate work across threads on my cloud computer, ping you when something important lands, and pause for logins or PRs that need your hands.\n\nTry: “Build a Dots vs Muse vs Grokbot comparison site” or “Analyze my last 10 YouTube videos.”`,
+      createdAt: now,
+    },
+  ];
+  state.activity = [
+    {
+      id: randomUUID(),
+      type: "info",
+      text: `${trimmed} is online — cloud computer + local access ready.`,
+      createdAt: now,
+    },
+  ];
+  cache = state;
   await persist(cache);
   return cache;
 }

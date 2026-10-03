@@ -1,13 +1,29 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChatPanel } from "@/components/chat-panel";
 import { DotAvatar } from "@/components/dot-avatar";
 import { Onboarding } from "@/components/onboarding";
 import { SidePanel } from "@/components/side-panel";
 import { StatusPill } from "@/components/status-pill";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useWorkspace } from "@/hooks/use-workspace";
+import type { Proactivity } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+const PROACTIVITY: { id: Proactivity; label: string; hint: string }[] = [
+  { id: "quiet", label: "Quiet", hint: "Only reply when you ask" },
+  { id: "balanced", label: "Balanced", hint: "Important inbox pings" },
+  { id: "high", label: "High", hint: "Chatty personal assistant" },
+];
 
 export function Workspace() {
   const {
@@ -18,20 +34,24 @@ export function Workspace() {
     sendMessage,
     resolveApproval,
     setComputerMode,
+    resolveAuth,
     addMemory,
     updateRule,
     toggleApp,
+    setProactivity,
+    selectTask,
     reset,
   } = useWorkspace();
+  const [profileOpen, setProfileOpen] = useState(false);
 
   if (error && !state) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#d9efe8_0%,_#eef2f0_45%,_#f5f1ea_100%)] px-6">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-6">
         <div className="max-w-md text-center">
-          <h1 className="font-heading text-3xl text-stone-900">Dot</h1>
-          <p className="mt-3 text-sm text-stone-600">{error}</p>
+          <h1 className="font-heading text-3xl text-zinc-50">Dot</h1>
+          <p className="mt-3 text-sm text-zinc-400">{error}</p>
           <Button
-            className="mt-4 bg-teal-800 hover:bg-teal-700"
+            className="mt-4 bg-teal-500 text-zinc-950 hover:bg-teal-400"
             onClick={() => window.location.reload()}
           >
             Retry
@@ -43,11 +63,11 @@ export function Workspace() {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#d9efe8_0%,_#eef2f0_45%,_#f5f1ea_100%)]">
-        <div className="flex items-center gap-3 text-sm text-stone-600">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+        <div className="flex items-center gap-3 text-sm text-zinc-400">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal-600" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-teal-400" />
           </span>
           Waking your Dot…
         </div>
@@ -60,10 +80,10 @@ export function Workspace() {
   }
 
   return (
-    <div className="relative flex h-dvh flex-col overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_#d9efe8_0%,_transparent_42%),radial-gradient(ellipse_at_bottom_right,_#e7e0d4_0%,_transparent_40%),linear-gradient(180deg,_#f3f6f4_0%,_#ebe7df_100%)]">
-      <div className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:radial-gradient(rgba(28,70,62,0.12)_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_rgba(45,140,120,0.16)_0%,_transparent_42%),radial-gradient(ellipse_at_bottom_right,_rgba(20,28,26,0.9)_0%,_transparent_40%),linear-gradient(180deg,_#0b100f_0%,_#101614_100%)]">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.25] [background-image:radial-gradient(rgba(120,200,180,0.14)_0.6px,transparent_0.6px)] [background-size:18px_18px]" />
 
-      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-stone-200/70 bg-white/40 px-4 py-3 backdrop-blur-md md:px-6">
+      <header className="relative z-10 flex items-center justify-between gap-4 border-b border-zinc-800/80 bg-zinc-950/50 px-4 py-3 backdrop-blur-md md:px-6">
         <div className="flex items-center gap-3">
           <DotAvatar
             tone={state.avatarTone}
@@ -71,20 +91,121 @@ export function Workspace() {
             size="md"
           />
           <div>
-            <h1 className="font-heading text-2xl leading-none tracking-tight text-stone-900 md:text-[1.75rem]">
+            <h1 className="font-heading text-2xl leading-none tracking-tight text-zinc-50 md:text-[1.75rem]">
               {state.agentName}
             </h1>
-            <p className="mt-0.5 text-xs text-stone-500">
-              Your Dot · cloud computer · asks before it writes
+            <p className="mt-0.5 text-xs text-zinc-500">
+              Your Dot · orchestrates threads ·{" "}
+              {state.proactivity} proactivity
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <StatusPill status={state.agentStatus} />
+          <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-zinc-400 hover:text-zinc-100"
+                />
+              }
+            >
+              <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5" />
+              Profile
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="border-zinc-800 bg-zinc-950 text-zinc-100 sm:max-w-md"
+            >
+              <SheetHeader>
+                <SheetTitle className="font-heading text-2xl text-zinc-50">
+                  {state.agentName}&apos;s profile
+                </SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-6 px-1">
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    Computers
+                  </p>
+                  <div className="space-y-2">
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 px-3 py-2.5">
+                      <p className="text-sm text-zinc-100">
+                        {state.agentName}&apos;s cloud computer
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        Always on · browser + shell
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/70 px-3 py-2.5">
+                      <p className="text-sm text-zinc-100">Your local machine</p>
+                      <p className="text-xs text-zinc-500">
+                        {state.localComputerConnected
+                          ? "Connected for Codex / local tasks"
+                          : "Disconnected"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    Proactivity
+                  </p>
+                  <div className="grid gap-2">
+                    {PROACTIVITY.map((level) => (
+                      <button
+                        key={level.id}
+                        type="button"
+                        onClick={() => {
+                          void setProactivity(level.id);
+                        }}
+                        className={cn(
+                          "rounded-xl border px-3 py-2.5 text-left transition",
+                          state.proactivity === level.id
+                            ? "border-teal-500/50 bg-teal-500/10"
+                            : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700",
+                        )}
+                      >
+                        <p className="text-sm font-medium text-zinc-100">
+                          {level.label}
+                        </p>
+                        <p className="text-xs text-zinc-500">{level.hint}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    Connected apps
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {state.apps.map((app) => (
+                      <button
+                        key={app.id}
+                        type="button"
+                        onClick={() => void toggleApp(app.id)}
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-[11px] ring-1",
+                          app.connected
+                            ? "bg-teal-500/15 text-teal-200 ring-teal-500/30"
+                            : "bg-zinc-900 text-zinc-500 ring-zinc-700",
+                        )}
+                      >
+                        {app.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
           <Button
             variant="ghost"
             size="sm"
-            className="hidden text-stone-500 hover:text-stone-800 sm:inline-flex"
+            className="hidden text-zinc-400 hover:text-zinc-100 sm:inline-flex"
             onClick={() => void reset()}
           >
             <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
@@ -93,7 +214,7 @@ export function Workspace() {
         </div>
       </header>
 
-      <main className="relative z-10 grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.95fr)]">
+      <main className="relative z-10 grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
         <ChatPanel
           messages={state.messages}
           sending={sending}
@@ -111,11 +232,13 @@ export function Workspace() {
             onAddMemory={addMemory}
             onUpdateRule={updateRule}
             onToggleApp={toggleApp}
+            onSelectTask={selectTask}
+            onResolveAuth={resolveAuth}
           />
         </div>
       </main>
 
-      <div className="relative z-10 max-h-[42vh] border-t border-stone-200/80 lg:hidden">
+      <div className="relative z-10 max-h-[42vh] border-t border-zinc-800 lg:hidden">
         <SidePanel
           state={state}
           onApprove={(id) => resolveApproval(id, "approved")}
@@ -124,6 +247,8 @@ export function Workspace() {
           onAddMemory={addMemory}
           onUpdateRule={updateRule}
           onToggleApp={toggleApp}
+          onSelectTask={selectTask}
+          onResolveAuth={resolveAuth}
         />
       </div>
     </div>

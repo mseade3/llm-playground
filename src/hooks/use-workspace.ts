@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AvatarTone, RuleMode, WorkspaceState } from "@/lib/types";
+import type {
+  AvatarTone,
+  Proactivity,
+  RuleMode,
+  WorkspaceState,
+} from "@/lib/types";
 
 async function fetchState(): Promise<WorkspaceState> {
   const res = await fetch("/api/state", { cache: "no-store" });
@@ -41,15 +46,28 @@ export function useWorkspace() {
     };
   }, [refresh]);
 
-  const createDot = useCallback(async (name: string, avatarTone: AvatarTone) => {
-    const res = await fetch("/api/onboard", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, avatarTone }),
-    });
-    if (!res.ok) throw new Error("Failed to create Dot");
-    setState(await res.json());
-  }, []);
+  const createDot = useCallback(
+    async (payload: {
+      name: string;
+      tone: AvatarTone;
+      connectGmail: boolean;
+      connectYoutube: boolean;
+    }) => {
+      const res = await fetch("/api/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: payload.name,
+          avatarTone: payload.tone,
+          connectGmail: payload.connectGmail,
+          connectYoutube: payload.connectYoutube,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create Dot");
+      setState(await res.json());
+    },
+    [],
+  );
 
   const sendMessage = useCallback(async (message: string) => {
     setSending(true);
@@ -60,8 +78,7 @@ export function useWorkspace() {
         body: JSON.stringify({ message }),
       });
       if (!res.ok) throw new Error("Failed to send message");
-      const next = (await res.json()) as WorkspaceState;
-      setState(next);
+      setState(await res.json());
     } finally {
       setSending(false);
     }
@@ -87,6 +104,12 @@ export function useWorkspace() {
       body: JSON.stringify({ mode }),
     });
     if (!res.ok) throw new Error("Failed to change computer mode");
+    setState(await res.json());
+  }, []);
+
+  const resolveAuth = useCallback(async () => {
+    const res = await fetch("/api/auth", { method: "POST" });
+    if (!res.ok) throw new Error("Failed to resolve auth");
     setState(await res.json());
   }, []);
 
@@ -126,6 +149,26 @@ export function useWorkspace() {
     setState(await res.json());
   }, []);
 
+  const setProactivity = useCallback(async (proactivity: Proactivity) => {
+    const res = await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proactivity }),
+    });
+    if (!res.ok) throw new Error("Failed to update proactivity");
+    setState(await res.json());
+  }, []);
+
+  const selectTask = useCallback(async (taskId: string | null) => {
+    const res = await fetch("/api/tasks/select", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ taskId }),
+    });
+    if (!res.ok) throw new Error("Failed to select task");
+    setState(await res.json());
+  }, []);
+
   const reset = useCallback(async () => {
     const res = await fetch("/api/state", { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to reset");
@@ -141,9 +184,12 @@ export function useWorkspace() {
     sendMessage,
     resolveApproval,
     setComputerMode,
+    resolveAuth,
     addMemory,
     updateRule,
     toggleApp,
+    setProactivity,
+    selectTask,
     reset,
   };
 }

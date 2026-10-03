@@ -1,16 +1,17 @@
 # Dot — always-on agent workspace
 
-A Dots-inspired demo shaped by OpenAI’s DevDay “Alfred” pattern: name your agent, watch it work on a cloud computer, pause for write/PR approvals, and keep standing goals alive between chats.
+A dark-themed, Dots-inspired demo: name your agent, orchestrate Codex-style threads, handle login takeovers, get proactive inbox pings, and approve PRs — patterns from OpenAI DevDay + early-access walkthroughs.
 
 ## What’s in the demo
 
-- **Create your Dot** — name + bubbly avatar (like Alfred)
-- **DevDay coding flow** — retire an inventory API: trace deps → update integrations → run tests → open PRs
-- **Approvals + custom rules** — Allow / Ask / Block for reads, tests, PRs, outbound mail
-- **Connected apps** — GitHub, Slack, Gmail, Notion toggles
-- **Standing goals** — continuous watches that flip to “acting” when work starts
-- **Cloud computer** — Take over / Return control
-- **Memory** — preferences that persist in `.data/`
+- **Dark charcoal + teal** UI
+- **Create your Dot** — name, avatar, plugin connect (Gmail / YouTube)
+- **Orchestration threads** — click worker threads Dot spins up
+- **Proactivity** — quiet / balanced / high (Profile or “be quieter”)
+- **Auth takeover** — YouTube Studio login + 2FA handoff
+- **DevDay coding flow** — retire inventory API → open PRs
+- **Comparison site flow** — Dots vs Muse vs Grokbot via a Soul worker
+- **Custom rules**, connected apps, standing goals, cloud computer
 
 No API keys required.
 
@@ -25,11 +26,12 @@ Open [http://127.0.0.1:43127](http://127.0.0.1:43127).
 
 ## Try these prompts
 
-1. **Remove the old inventory API before it gets shut down.** (primary DevDay-style demo)
-2. Research three competitors for a neighborhood coffee shop and draft a one-page brief.
-3. Pull overdue invoices and draft polite follow-up emails.
+1. **Build a Dots vs Muse vs Grokbot comparison site.**
+2. **Analyze my last 10 YouTube videos in Studio.** (finish auth when prompted)
+3. **Remove the old inventory API before it gets shut down.**
+4. **Be quieter** / **be more proactive**
 
 ## Notes
 
-- Workspace state is stored in `.data/workspace.json` (gitignored).
-- Use **Reset** to return to the Create your Dot screen.
+- State lives in `.data/workspace.json` (gitignored).
+- **Reset** returns to Create your Dot.

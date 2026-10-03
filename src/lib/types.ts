@@ -38,6 +38,8 @@ export type TaskStep = {
   result?: string;
   durationMs?: number;
   browse?: { title: string; url: string; content: string };
+  /** Pause for login / 2FA takeover on the cloud computer */
+  needsAuth?: { site: string; message: string };
 };
 
 export type PullRequest = {
@@ -65,6 +67,10 @@ export type Task = {
   artifact?: string;
   pullRequests?: PullRequest[];
   error?: string;
+  /** Orchestration thread label shown in the activity rail */
+  threadLabel?: string;
+  /** Simulated sub-agent / worker model (e.g. Soul 6.1) */
+  workerModel?: string;
 };
 
 export type Approval = {
@@ -119,17 +125,35 @@ export type BrowserTab = {
   active: boolean;
 };
 
+export type AuthChallenge = {
+  id: string;
+  site: string;
+  message: string;
+  status: "pending" | "resolved" | "dismissed";
+  createdAt: string;
+};
+
 export type ComputerState = {
   mode: ComputerMode;
   status: "idle" | "working" | "waiting" | "offline";
   currentAction?: string;
   tabs: BrowserTab[];
   logs: string[];
+  authChallenge?: AuthChallenge | null;
 };
 
 export type ActivityEvent = {
   id: string;
-  type: "info" | "work" | "approval" | "memory" | "handoff" | "error" | "pr";
+  type:
+    | "info"
+    | "work"
+    | "approval"
+    | "memory"
+    | "handoff"
+    | "error"
+    | "pr"
+    | "proactive"
+    | "orchestrate";
   text: string;
   createdAt: string;
   taskId?: string;
@@ -137,10 +161,15 @@ export type ActivityEvent = {
 
 export type AvatarTone = "teal" | "coral" | "indigo" | "amber";
 
+export type Proactivity = "quiet" | "balanced" | "high";
+
 export type WorkspaceState = {
   onboarded: boolean;
   agentName: string;
   avatarTone: AvatarTone;
+  proactivity: Proactivity;
+  localComputerConnected: boolean;
+  selectedTaskId?: string | null;
   messages: Message[];
   tasks: Task[];
   approvals: Approval[];
@@ -151,4 +180,5 @@ export type WorkspaceState = {
   computer: ComputerState;
   activity: ActivityEvent[];
   agentStatus: "idle" | "thinking" | "working" | "waiting" | "paused";
+  lastProactiveAt?: string | null;
 };

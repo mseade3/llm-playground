@@ -21,22 +21,22 @@ export function StatusPill({
     <span
       className={cn(
         "inline-flex items-center gap-2 rounded-md px-2.5 py-1 text-xs font-medium tracking-wide",
-        status === "waiting" && "bg-amber-100 text-amber-900",
-        status === "paused" && "bg-stone-200 text-stone-700",
-        status === "idle" && "bg-teal-50 text-teal-900",
-        live && "bg-teal-100 text-teal-950",
+        status === "waiting" && "bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30",
+        status === "paused" && "bg-zinc-700/60 text-zinc-300 ring-1 ring-zinc-600",
+        status === "idle" && "bg-teal-500/10 text-teal-200 ring-1 ring-teal-500/25",
+        live && "bg-teal-500/15 text-teal-100 ring-1 ring-teal-400/30",
       )}
     >
       <span className="relative flex h-2 w-2">
         {live && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-60" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-60" />
         )}
         <span
           className={cn(
             "relative inline-flex h-2 w-2 rounded-full",
-            status === "waiting" && "bg-amber-500",
-            status === "paused" && "bg-stone-500",
-            (status === "idle" || live) && "bg-teal-600",
+            status === "waiting" && "bg-amber-400",
+            status === "paused" && "bg-zinc-400",
+            (status === "idle" || live) && "bg-teal-400",
           )}
         />
       </span>

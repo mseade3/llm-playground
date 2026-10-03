@@ -21,6 +21,8 @@ const runningTasks = new Set<string>();
 type PlanSeed = {
   match: RegExp;
   goalLabel: string;
+  threadLabel?: string;
+  workerModel?: string;
   memory?: { kind: "project" | "preference" | "fact"; text: string };
   steps: Array<{
     title: string;
@@ -28,6 +30,7 @@ type PlanSeed = {
     detail: string;
     requiresApproval?: boolean;
     browse?: { title: string; url: string; content: string };
+    needsAuth?: { site: string; message: string };
     result: string;
     durationMs: number;
   }>;
@@ -38,8 +41,158 @@ type PlanSeed = {
 
 const PLANS: PlanSeed[] = [
   {
+    match: /muse|grokbot|grok bot|comparison site|use cases|dots vs/i,
+    goalLabel: "Build Dots comparison website",
+    threadLabel: "Codex thread · dots project",
+    workerModel: "Soul 6.1",
+    memory: {
+      kind: "project",
+      text: "Building a Dots vs Muse vs Grokbot comparison site.",
+    },
+    steps: [
+      {
+        title: "Spin up Codex worker thread",
+        kind: "code",
+        detail: "Orchestrating a Soul 6.1 thread inside the dots project.",
+        browse: {
+          title: "codex · dots / comparison-site",
+          url: "codex://threads/dots-comparison",
+          content:
+            "Worker: Soul 6.1 (high)\nOrchestrator: Astra via Dot\nBrief: local site covering top 5 Dot use cases + Muse/Grokbot contrast\nStatus: thread created, researching product claims…",
+        },
+        result: "Opened a Codex worker thread for the comparison site.",
+        durationMs: 1300,
+      },
+      {
+        title: "Verify product claims",
+        kind: "research",
+        detail: "Cross-checking Dots, Muse, and Grokbot positioning.",
+        browse: {
+          title: "research · competitive notes",
+          url: "https://research.dot/assistant-landscape",
+          content:
+            "Dots — GPT-6 Astra, orchestration + proactive cloud computer, Pro+.\nMuse — Spark 1.3, free tier, lighter personal assistant.\nGrokbot — Grok 4.7, ~$20/mo, middle ground.\nTop use cases: workflow feedback, marketing launch, research, sales, content.",
+        },
+        result: "Locked competitor matrix and five use cases.",
+        durationMs: 1500,
+      },
+      {
+        title: "Build local preview site",
+        kind: "code",
+        detail: "Soul implementing pages; Dot watching the thread.",
+        browse: {
+          title: "localhost:4321 · preview",
+          url: "http://127.0.0.1:4321",
+          content:
+            "Dots Comparison\n\nFind your use case\n• Workflow feedback loops\n• Marketing launches\n• Research analysis\n• Sales follow-through\n• Content production\n\nEach card contrasts Dots · Muse · Grokbot.",
+        },
+        result: "Local preview is running with the five use-case pages.",
+        durationMs: 1800,
+      },
+      {
+        title: "Pin preview for review",
+        kind: "write",
+        detail: "Save the handoff so you can open the preview later.",
+        requiresApproval: true,
+        result: "Comparison site handoff saved.",
+        durationMs: 800,
+      },
+    ],
+    artifact: `# Dots comparison site — handoff
+
+## Preview
+Local site enumerates five use cases and contrasts **Dots / Muse / Grokbot**.
+
+## Use cases
+1. Workflow feedback
+2. Marketing launch
+3. Research analysis
+4. Sales
+5. Content production
+
+## Orchestration note
+Dot ran this as a Codex worker thread (Soul 6.1) while staying available in chat — the remote-orchestration pattern from early-access demos.`,
+    reply: (name) =>
+      `Got it — ${name} will open a Codex worker thread, verify claims, and build a local comparison site. I'll keep orchestrating from this chat and ping you when the preview is ready.`,
+  },
+  {
+    match: /youtube|analytics|videos|studio|channel/i,
+    goalLabel: "YouTube Studio analytics review",
+    threadLabel: "Cloud computer · YouTube Studio",
+    workerModel: "Astra",
+    memory: {
+      kind: "project",
+      text: "Reviewing recent long-form YouTube performance.",
+    },
+    steps: [
+      {
+        title: "Open YouTube Studio",
+        kind: "browse",
+        detail: "Launching Studio on the cloud computer — login may be required.",
+        browse: {
+          title: "YouTube Studio",
+          url: "https://studio.youtube.com",
+          content:
+            "Sign in to continue to YouTube Studio\n\nSelect account to analyze the last 10 long-form videos.\n2-step verification may be required.",
+        },
+        needsAuth: {
+          site: "YouTube Studio",
+          message:
+            "I hit Google sign-in + 2FA on my cloud computer. Take over to finish authentication, then return control.",
+        },
+        result: "Signed into YouTube Studio on the cloud computer.",
+        durationMs: 1200,
+      },
+      {
+        title: "Pull last 10 long-form videos",
+        kind: "analyze",
+        detail: "Scraping analytics pages for views, CTR, and retention.",
+        browse: {
+          title: "Analytics · Content",
+          url: "https://studio.youtube.com/channel/analytics",
+          content:
+            "Last 10 long-form:\n1. Dots early access — 84k views, 7.2% CTR, 48% avg view\n2. Codex tips — 61k, 5.1% CTR, 41%\n3. Claude Code setup — 52k, 6.4% CTR, 45%\n…\nPattern: product-access + comparison thumbnails outperform pure tutorials.",
+        },
+        result: "Collected metrics for the last 10 long-form uploads.",
+        durationMs: 1700,
+      },
+      {
+        title: "Write performance brief",
+        kind: "draft",
+        detail: "Summarizing winners, middling videos, and next bets.",
+        result: "Drafted a concise YouTube performance brief.",
+        durationMs: 1400,
+      },
+      {
+        title: "Save analytics brief",
+        kind: "write",
+        detail: "Persist the brief to the workspace.",
+        requiresApproval: true,
+        result: "Analytics brief saved.",
+        durationMs: 700,
+      },
+    ],
+    artifact: `# YouTube analytics — last 10 long-form
+
+## What's working
+- **Early-access / product drops** win on CTR and average view duration
+- Comparison framing (Dots vs Muse vs Grokbot) keeps retention past the intro
+
+## Middling
+- Generic “tips” videos without a timely hook
+
+## Next bets
+1. Ship a 10-minute “remote orchestration with Dots” walkthrough
+2. Thumbnail: avatar + competitor logos, less text
+3. CTA to a standing goal: weekly Studio check-in`,
+    reply: (name) =>
+      `${name} will open YouTube Studio on the cloud computer. If Google asks for 2FA, take over briefly — then I'll finish the last-10 analysis.`,
+  },
+  {
     match: /inventory|api|deprecate|pull request|pr\b|repo|dependency|codex/i,
     goalLabel: "Retire old inventory API",
+    threadLabel: "GitHub · commerce",
+    workerModel: "Astra",
     memory: {
       kind: "project",
       text: "Retiring the legacy inventory API before shutdown.",
@@ -485,10 +638,82 @@ async function runTaskLoop(
 
       await addActivity("work", step.title, taskId);
       await setComputerWorking(step.detail ?? step.title, step.browse);
+
+      if (step.needsAuth) {
+        const challengeId = randomUUID();
+        await updateState((s) => {
+          s.computer.authChallenge = {
+            id: challengeId,
+            site: step.needsAuth!.site,
+            message: step.needsAuth!.message,
+            status: "pending",
+            createdAt: new Date().toISOString(),
+          };
+          s.computer.mode = "user";
+          s.computer.status = "waiting";
+          s.computer.currentAction = `Auth needed: ${step.needsAuth!.site}`;
+          s.agentStatus = "paused";
+          const t = s.tasks.find((x) => x.id === taskId);
+          if (t) {
+            t.status = "paused";
+            t.updatedAt = new Date().toISOString();
+          }
+        });
+        await addActivity(
+          "handoff",
+          `Take over for ${step.needsAuth.site} login / 2FA.`,
+          taskId,
+        );
+        await addMessage(
+          "assistant",
+          `I need you on the cloud computer for **${step.needsAuth.site}**.\n\n${step.needsAuth.message}`,
+          taskId,
+        );
+
+        // Wait until auth is resolved or user returns control after resolving
+        while (true) {
+          await sleep(700);
+          const authState = await readState();
+          const challenge = authState.computer.authChallenge;
+          if (
+            !challenge ||
+            challenge.id !== challengeId ||
+            challenge.status === "resolved"
+          ) {
+            break;
+          }
+          if (
+            authState.computer.mode === "agent" &&
+            challenge.status === "pending"
+          ) {
+            // User returned control without finishing — keep waiting on agent but re-pause
+            await updateState((s) => {
+              if (s.computer.authChallenge?.id === challengeId) {
+                s.computer.mode = "user";
+                s.agentStatus = "paused";
+                s.computer.status = "waiting";
+              }
+            });
+          }
+        }
+
+        await updateState((s) => {
+          const t = s.tasks.find((x) => x.id === taskId);
+          if (t && t.status === "paused") {
+            t.status = "running";
+            t.updatedAt = new Date().toISOString();
+          }
+          s.agentStatus = "working";
+          s.computer.mode = "agent";
+          s.computer.status = "working";
+          s.computer.currentAction = step.detail ?? step.title;
+        });
+      }
+
       await sleep(Math.max(600, step.durationMs ?? 1200));
 
       const mid = await readState();
-      if (mid.computer.mode === "user") {
+      if (mid.computer.mode === "user" && !mid.computer.authChallenge) {
         await updateState((s) => {
           const t = s.tasks.find((x) => x.id === taskId);
           if (!t) return;
@@ -559,6 +784,25 @@ async function runTaskLoop(
 }
 
 export async function startGoal(goal: string): Promise<WorkspaceState> {
+  if (/be quieter|less proactive|too many (pings|messages)|quiet mode/i.test(goal)) {
+    await setProactivity("quiet");
+    await addMessage("user", goal);
+    await addMessage(
+      "assistant",
+      "Got it — dialing proactivity down to **quiet**. I won't ping about inbox noise unless you ask. You can raise it anytime in Profile.",
+    );
+    return readState();
+  }
+  if (/be more proactive|ping me more|high proactivity/i.test(goal)) {
+    await setProactivity("high");
+    await addMessage("user", goal);
+    await addMessage(
+      "assistant",
+      "On it — proactivity is now **high**. I'll surface important mail and thread updates more often.",
+    );
+    return readState();
+  }
+
   const state = await readState();
   const plan = pickPlan(goal);
   const now = new Date().toISOString();
@@ -573,6 +817,7 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     result: s.result,
     durationMs: s.durationMs,
     browse: s.browse,
+    needsAuth: s.needsAuth,
   }));
 
   const task: Task = {
@@ -584,16 +829,25 @@ export async function startGoal(goal: string): Promise<WorkspaceState> {
     createdAt: now,
     updatedAt: now,
     plannedArtifact: plan.artifact,
+    threadLabel: plan.threadLabel ?? "Cloud thread",
+    workerModel: plan.workerModel ?? "Astra",
   };
 
   await updateState((s) => {
     s.tasks.unshift(task);
+    s.selectedTaskId = task.id;
     s.agentStatus = "thinking";
   });
 
   await addMessage("user", goal, task.id);
   await addMessage("assistant", plan.reply(state.agentName), task.id);
-  await addActivity("work", `Started: ${plan.goalLabel}`, task.id);
+  await addActivity(
+    plan.workerModel ? "orchestrate" : "work",
+    plan.workerModel
+      ? `Orchestrating ${plan.workerModel}: ${plan.goalLabel}`
+      : `Started: ${plan.goalLabel}`,
+    task.id,
+  );
 
   if (plan.memory) {
     await upsertMemory(plan.memory.kind, plan.memory.text);
@@ -753,6 +1007,128 @@ export async function toggleApp(appId: string) {
   await updateState((state) => {
     const app = state.apps.find((a) => a.id === appId);
     if (app) app.connected = !app.connected;
+    if (appId === "gmail") {
+      const standing = state.standingGoals.find((g) => g.id === "sg-inbox");
+      if (standing) {
+        standing.status = app?.connected ? "watching" : "paused";
+      }
+    }
   });
   return readState();
 }
+
+export async function setProactivity(
+  level: WorkspaceState["proactivity"],
+): Promise<WorkspaceState> {
+  await updateState((state) => {
+    state.proactivity = level;
+  });
+  await addActivity("info", `Proactivity set to ${level}.`);
+  return readState();
+}
+
+export async function selectTask(taskId: string | null): Promise<WorkspaceState> {
+  await updateState((state) => {
+    state.selectedTaskId = taskId;
+  });
+  return readState();
+}
+
+export async function resolveAuthChallenge(): Promise<WorkspaceState> {
+  await updateState((state) => {
+    if (state.computer.authChallenge) {
+      state.computer.authChallenge.status = "resolved";
+    }
+    state.computer.mode = "agent";
+    state.computer.status = "working";
+    state.computer.currentAction = "Auth complete — resuming.";
+    state.computer.logs.unshift("User finished login / 2FA. Control returned.");
+    state.agentStatus = "working";
+    for (const task of state.tasks) {
+      if (task.status === "paused") {
+        task.status = "running";
+        task.updatedAt = new Date().toISOString();
+      }
+    }
+  });
+  await addActivity("handoff", "Auth finished — returned control to Dot.");
+  await addMessage(
+    "assistant",
+    "Thanks — I'm signed in and picking the work back up.",
+  );
+  const state = await readState();
+  for (const task of state.tasks) {
+    if (task.status === "running") {
+      await resumeTask(task.id);
+    }
+  }
+  return readState();
+}
+
+const PROACTIVE_SNIPPETS = [
+  {
+    subject: "Acme Studio — contract revision",
+    body: "Just got an email from **Jordan at Acme Studio** asking if we can move the inventory cutover to Thursday. Want me to draft a reply or update the standing goal?",
+  },
+  {
+    subject: "Bright Harbor — invoice question",
+    body: "Heads up — **Bright Harbor** replied on invoice #1108 saying payment lands Friday. I logged it against the receivables thread.",
+  },
+  {
+    subject: "Hiring loop — design trial",
+    body: "New mail: a design trial candidate accepted the take-home. Should I schedule a review block or leave it for you?",
+  },
+];
+
+let proactiveTimer: ReturnType<typeof setInterval> | null = null;
+let proactiveIndex = 0;
+
+export function ensureProactiveLoop() {
+  if (proactiveTimer) return;
+  proactiveTimer = setInterval(() => {
+    void maybeSendProactive();
+  }, 14000);
+}
+
+async function maybeSendProactive() {
+  try {
+    const state = await readState();
+    if (!state.onboarded) return;
+    if (state.proactivity === "quiet") return;
+    const gmail = state.apps.find((a) => a.id === "gmail");
+    if (!gmail?.connected) return;
+
+    const minGapMs = state.proactivity === "high" ? 12000 : 28000;
+    if (
+      state.lastProactiveAt &&
+      Date.now() - new Date(state.lastProactiveAt).getTime() < minGapMs
+    ) {
+      return;
+    }
+    // Don't stack on top of an auth or approval wait too aggressively
+    if (state.agentStatus === "waiting" && state.proactivity !== "high") return;
+
+    const snippet = PROACTIVE_SNIPPETS[proactiveIndex % PROACTIVE_SNIPPETS.length];
+    proactiveIndex += 1;
+
+    await updateState((s) => {
+      s.lastProactiveAt = new Date().toISOString();
+      const standing = s.standingGoals.find((g) => g.id === "sg-inbox");
+      if (standing) standing.status = "acting";
+    });
+    await addActivity("proactive", `Inbox ping: ${snippet.subject}`);
+    await addMessage(
+      "assistant",
+      `Proactive ping — ${snippet.subject}\n\n${snippet.body}\n\n_(Say “be quieter” or flip proactivity in Profile if this is too chatty.)_`,
+    );
+    await updateState((s) => {
+      const standing = s.standingGoals.find((g) => g.id === "sg-inbox");
+      if (standing && s.agentStatus === "idle") standing.status = "watching";
+    });
+  } catch {
+    // ignore timer errors
+  }
+}
+
+// Kick the loop when the module loads in the server runtime
+ensureProactiveLoop();
